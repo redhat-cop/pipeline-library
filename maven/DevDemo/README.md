@@ -6,7 +6,6 @@ This Jenkins pipeline is designed to run under the following conditions:
 - the application will be built & packaged in a [Jenkins slave pod](https://github.com/rht-labs/labs-ci-cd/tree/master/docker/mvn-build-pod), not via S2I source
 - the container image will be built via S2I binary, initiated from the slave pod that built the application
 
-
 For an NPM pipeline designed the same way, see [here](../../npm/DevDemo/Jenkinsfile)
 
 

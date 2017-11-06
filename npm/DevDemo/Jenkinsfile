@@ -23,15 +23,16 @@ node (''){
 
     // this value is relative to env.SOURCE_CONTEXT_DIR
     // it should be set to the location where you build outputs the artifacts you want to publish to your container build
-    env.BUILD_OUTPUT_CONTEXT_DIR = "target/"
+    env.BUILD_OUTPUT_CONTEXT_DIR = "."
 
     /**
         TODO add support for npm artifact repos
     **/
 
 
-    // the complete build command
-    env.BUILD_COMMAND = "npm install &&"
+    // the complete build command. modify as need
+    // depending on the slave, you may need to wrap this command with scl enable
+    env.BUILD_COMMAND = "npm install && npm run-script ci"
 
 
 
