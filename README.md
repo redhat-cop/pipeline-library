@@ -1,6 +1,6 @@
 # What This Repo Is
 
-A repository of application centric [Jenkins pipeline files](https://jenkins.io/doc/book/pipeline/) that be references or reused for appropriate applications.
+A repository of application centric [Jenkins pipeline files](https://jenkins.io/doc/book/pipeline/) that can be referenced or reused for appropriate applications.
 We'll organize pipelines by the build tool of application. 
 
 It will be common to require custom Jenkins slaves, and if so, a README should link to a slave definition.
