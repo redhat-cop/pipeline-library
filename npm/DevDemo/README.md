@@ -3,7 +3,7 @@
 This Jenkins pipeline is designed to run under the following conditions:
 
 - the Jenkins pipeline job is created via the OpenShift sync plugin, which in turn requires a `BuildConfig` with strategy `pipeline` 
-- the application will be built & packaged in a [Jenkins slave pod](https://github.com/rht-labs/labs-ci-cd/tree/master/docker/npm-build-pod), not via S2I source
+- the application will be built & packaged in a [Jenkins slave pod](https://github.com/rht-labs/labs-ci-cd/tree/master/docker/jenkins-slave-npm), not via S2I source
 - the container image will be built via S2I binary, initiated from the slave pod that built the application
 
 For an Maven pipeline designed the same way, see [here](../../maven/DevDemo/Jenkinsfile)
@@ -17,7 +17,7 @@ The following resources are commonly used in support of this pipeline:
   - [this version](https://github.com/rht-labs/labs-ci-cd/blob/master/templates/s2i-app-build/template-with-secrets.json) uses a `sourcesecret`
   - [this version](https://github.com/rht-labs/labs-ci-cd/blob/master/templates/s2i-app-build/template-no-secrets.json) does not use a `sourcesecret`
 - [an OpenShift template](https://github.com/rht-labs/labs-ci-cd/blob/master/templates/jenkins-slave-pod/template.json) for a custom Jenkins slave pod
-- Docker builds that define a [NPM Jenkins Slave](https://github.com/rht-labs/labs-ci-cd/tree/master/docker/npm-build-pod)
+- Docker builds that define a [NPM Jenkins Slave](https://github.com/rht-labs/labs-ci-cd/tree/master/docker/jenkins-slave-npm)
 - A generic application `DeploymentConfig` for apps exposes http endpoints - [example](https://github.com/rht-labs/labs-ci-cd/blob/master/templates/http-app-deploy/template.json)
 - The ansible automation in the [openshift-applier]((https://github.com/redhat-cop/casl-ansible/tree/master/roles/openshift-applier) role in `casl-ansible`.
 

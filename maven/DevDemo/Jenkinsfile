@@ -40,7 +40,7 @@ node (''){
 
 
     // the name of the image stream that you want to when building your application source code
-    env.JENKINS_SLAVE_NAME = 'mvn-build-pod'
+    env.JENKINS_SLAVE_NAME = 'jenkins-slave-mvn'
 
     // these are defaults that will help run openshift automation
     // DO NOT DELETE THESE - they are required
