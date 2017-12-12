@@ -1,0 +1,92 @@
+#!/usr/bin/groovy
+
+/**
+    this section of the pipeline executes on the master, which has a lot of useful variables that we can leverage to configure our pipeline
+**/
+node (''){
+    // these should align to the projects in the Application Inventory
+    env.NAMESPACE = env.OPENSHIFT_BUILD_NAMESPACE.reverse().drop(6).reverse()
+    env.TEST_PROJECT = "${env.NAMESPACE}-test"
+
+    /**
+    this value assumes the following convention, which is enforced by our default templates:
+    - there are two build configs: one for s2i, one for this pipeline
+    - the buildconfig for this pipeline is called my-app-name-pipeline
+    - both buildconfigs are in the same project
+    **/
+    env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?${env.PROJECT_NAME}-?/, '').replaceAll(/-?pipeline-?/, '')
+
+    // the name of the image stream that you want to when building your application source code
+    env.JENKINS_SLAVE_NAME = 'jenkins-slave-ansible'
+
+    // these are defaults that will help run openshift automation
+    // DO NOT DELETE THESE - they are required
+    env.OCP_API_SERVER = "${env.OPENSHIFT_API_URL}"
+    env.OCP_TOKEN = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
+}
+
+/**
+    this section of the pipeline executes on a custom ansible build slave.
+    you should not need to change anything below, but you will need to make sure your code containing the openshift-applier inventory
+    has a filter_tag that matches the env.TEST_PROJECT variable above
+**/
+
+node("${env.JENKINS_SLAVE_NAME}") {
+
+    stage('Clean Dynamic') {
+        sh '''
+            IS_DELETED="init"
+
+            {
+                oc delete project $TEST_PROJECT
+            } || {
+                echo "Project doesn't exist, moving on..." &&
+                IS_DELETED=""
+            }
+
+            while [ "$IS_DELETED" != "" ]
+            do
+                echo $IS_DELETED
+                IS_DELETED=$(oc get projects | grep $TEST_PROJECT | awk '{print $4}')
+            done
+        '''
+
+        echo "Very slight delay between script above and full deletion, do this sleep just to be sure"
+        sleep 10
+    }
+
+    stage('Deploy to Dynamic') {
+        // pull your infrastrcuture as code repository
+        git url: 'https://github.com/rht-labs/labs-ci-cd.git'
+
+        echo "Create Openshift Resources"
+
+        // If this filter_tag contains a project request then jenkins service account MUST be able to create project requests
+
+        sh '''
+            ansible-galaxy install -r requirements.yml --roles-path=.
+            ansible-playbook casl-ansible/playbooks/openshift-cluster-seed.yml -e "filter_tags=$TEST_PROJECT" -i inventory/ --connection local -vvvv
+        '''
+
+        sleep 30
+
+        echo "Deploy ${env.APP_NAME}"
+        openshiftTag(apiURL: "${env.OCP_API_SERVER}", authToken: "${env.OCP_TOKEN}", destStream: "${env.APP_NAME}", destTag: 'latest', destinationAuthToken: "${env.OCP_TOKEN}", destinationNamespace: "${env.TEST_PROJECT}", namespace: "${env.OPENSHIFT_BUILD_NAMESPACE}", srcStream: "${env.APP_NAME}", srcTag: 'latest')
+
+        // check deployment completed
+        openshiftVerifyDeployment(apiURL: "${env.OCP_API_SERVER}", authToken: "${env.OCP_TOKEN}", depCfg: "${env.APP_NAME}", namespace: "${env.TEST_PROJECT}", verifyReplicaCount: true)
+    }
+
+    stage('Run Automated Tests'){
+        echo "This is where you would want to run your tests against this ephemeral environment"
+    }
+
+    input('Delete Dynamic environment?')
+
+    stage('Delete Dynamic'){
+        sh '''
+            oc delete project $TEST_PROJECT
+        '''
+    }
+
+}
