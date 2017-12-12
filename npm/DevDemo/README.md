@@ -19,7 +19,7 @@ The following resources are commonly used in support of this pipeline:
 - [an OpenShift template](https://github.com/rht-labs/labs-ci-cd/blob/master/templates/jenkins-slave-pod/template.json) for a custom Jenkins slave pod
 - Docker builds that define a [NPM Jenkins Slave](https://github.com/rht-labs/labs-ci-cd/tree/master/docker/jenkins-slave-npm)
 - A generic application `DeploymentConfig` for apps exposes http endpoints - [example](https://github.com/rht-labs/labs-ci-cd/blob/master/templates/http-app-deploy/template.json)
-- The ansible automation in the [openshift-applier]((https://github.com/redhat-cop/casl-ansible/tree/master/roles/openshift-applier) role in `casl-ansible`.
+- The ansible automation in the [openshift-applier](https://github.com/redhat-cop/casl-ansible/tree/master/roles/openshift-applier) role in `casl-ansible`.
 
 ## Getting Started
 
