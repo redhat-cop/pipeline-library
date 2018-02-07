@@ -1,0 +1,16 @@
+# Notifications library
+
+Sends notifications on build status to rocketChat.
+
+This requires you to set up an [Incoming Webhook](https://rocket.chat/docs/administrator-guides/integrations/) in RocketChat.
+
+Sample usage:
+
+```
+@Library('cop-library') _
+
+def rocketchat_url = 'https://rocket.example.com/hooks/[integration_id]/[integration_secret]'
+def n = new org.redhatcop.util.notifications()
+
+n.notifyBuild('STARTED', rocketchat_url)
+```

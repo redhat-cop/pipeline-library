@@ -1,18 +1,13 @@
-# What This Repo Is
+# OpenShift Pipeline Library
 
-A repository of application centric [Jenkins pipeline files](https://jenkins.io/doc/book/pipeline/) that can be referenced or reused for appropriate applications.
-We'll organize pipelines by the build tool of application. 
+## What This Repo Is
 
-It will be common to require custom Jenkins slaves, and if so, a README should link to a slave definition.
+This is a shared library of Jenkins Pipeline functionality we've developed and use frequently within the CoP.
 
-# What This Repo Is NOT 
 
-* steps / functions / library code 
-* end to end examples/demos/quickstarts. 
-* infrastructure / platform centric Jenkinsfile
 
-Please see https://github.com/redhat-cop/container-pipelines or https://github.com/redhat-cop/containers-quickstarts for this type of content.
+Please see https://github.com/redhat-cop/container-pipelines or https://github.com/redhat-cop/containers-quickstarts for related content.
 
-# Other Resources
+## Other Resources
 
-* https://github.com/fabric8io/fabric8-jenkinsfile-library which influenced the structure of this project
+* https://jenkins.io/doc/book/pipeline/shared-libraries/
