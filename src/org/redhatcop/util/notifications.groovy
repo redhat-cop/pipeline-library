@@ -1,16 +1,16 @@
 package org.redhatcop.util;
 
-def rocketChatSend(String text, String emoji) {
+def rocketChatSend(String url, String text, String emoji) {
   echo "Sending rocketchat message: {\"username\":\"Jenkins\",\"icon_emoji\":\"${emoji}\",\"text\": \"${text}\"}"
 
   //def body = JsonOutput.toJson([username: 'Jenkins', icon_emoji: emoji, text: text])
   // POST Message
-  def response = httpRequest url: 'https://chat.consulting.redhat.com/hooks/CujHkriZ9vbdisMMX/S4wqzhvWN2u6YmcHFMvXis43jEAynhhFxRmN7dYEoX2LQWLe',
+  def response = httpRequest url: url,
     httpMode: 'POST',
     requestBody: "{\"username\":\"Jenkins\",\"icon_emoji\":\"${emoji}\",\"text\": \"${text}\"}"
 }
 
-def notifyBuild(String buildStatus = 'STARTED') {
+def notifyBuild(String buildStatus = 'STARTED', String rocketChatUrl) {
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
 
@@ -38,7 +38,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
   }
 
   // Send notifications
-  rocketChatSend(summary, status_icon)
+  rocketChatSend(rocketChatUrl, summary, status_icon)
   echo "Sending RocketChat Notification: ${buildStatus}"
 
 }
