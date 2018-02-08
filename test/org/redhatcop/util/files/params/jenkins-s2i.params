@@ -1,0 +1,3 @@
+JENKINS_GIT_URL=https://github.com/etsauer/pipeline-library.git
+JENKINS_GIT_BRANCH=shared-lib
+JENKINS_GIT_CONTEXT_DIR=jenkins-s2i/

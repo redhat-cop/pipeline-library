@@ -1,0 +1,2 @@
+NAMESPACE=pipeline-library-test
+JENKINS_IMAGE_STREAM_TAG=jenkins2-s2i:latest

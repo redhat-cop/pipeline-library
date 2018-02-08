@@ -1,0 +1,5 @@
+APPLICATION_NAME=notifications-test
+NAMESPACE=pipeline-library-test
+SOURCE_REPOSITORY_URL=https://github.com/etsauer/pipeline-library.git
+SOURCE_REPOSITORY_REF=shared-lib
+CONTEXT_DIR=test/org/redhatcop/util/
