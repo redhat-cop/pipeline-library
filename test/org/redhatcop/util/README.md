@@ -5,7 +5,7 @@ This directory contains a test inventory for testing the `org.redhatcop.utils` p
 ## Steps to test
 
 1. Must create a rocketchat incoming webhook integration
-2. Must create a secret containing the URL parts, like this:
+2. Update files/rocketchat-secret.yml to match the webhook integration you created. The secret should look like:
     ```
     apiVersion: v1
     kind: Secret
@@ -19,5 +19,5 @@ This directory contains a test inventory for testing the `org.redhatcop.utils` p
     Where the full rocketchat URL looks like `https://rocketchat.example.com/hooks/somehookid/somehooksecret`.
 3. Run ansible.
     ```
-    ansible-playbook -i ./inventory/ ~/src/casl-ansible/playbooks/openshift-cluster-seed.yml
+    ansible-playbook -i ./inventory/ ~/src/casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
     ```
