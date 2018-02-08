@@ -19,5 +19,5 @@ This directory contains a test inventory for testing the `org.redhatcop.utils` p
     Where the full rocketchat URL looks like `https://rocketchat.example.com/hooks/somehookid/somehooksecret`.
 3. Run ansible.
     ```
-    ansible-playbook -i ./inventory/ ~/src/casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
+    ansible-playbook -i ./inventory/ ~/src/casl-ansible/playbooks/openshift-cluster-seed.yml
     ```
