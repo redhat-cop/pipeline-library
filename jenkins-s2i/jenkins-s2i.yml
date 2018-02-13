@@ -5,7 +5,7 @@ labels:
   group: jenkins2-s2i
 metadata:
   annotations:
-    description: Creates the Jenins2 image for CD Pipeline builds
+    description: Creates the Jenkins2 image for CD Pipeline builds
     iconClass: icon-jenkins
     tags: instant-app,jenkins,cicd
   name: jenkins2-s2i

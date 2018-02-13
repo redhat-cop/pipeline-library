@@ -4,7 +4,7 @@ This directory contains a test inventory for testing the `org.redhatcop.utils` p
 
 ## Steps to test
 
-1. Must create a rocketchat incoming webhook integration
+1. Must create a rocketchat [incoming webhook integration](https://rocket.chat/docs/administrator-guides/integrations/)
 2. Update files/rocketchat-secret.yml to match the webhook integration you created. The secret should look like:
     ```
     apiVersion: v1

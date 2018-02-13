@@ -33,13 +33,6 @@ objects:
       type: "JenkinsPipeline"
       jenkinsPipelineStrategy:
         jenkinsfilePath: "Jenkinsfile"
-        env:
-        - name: "BUILD_CONTEXT_DIR"
-          value: "demo"
-        - name: "SOURCE_REPOSITORY_URL"
-          value: "${SOURCE_REPOSITORY_URL}"
-        - name: "SOURCE_REPOSITORY_REF"
-          value: "${SOURCE_REPOSITORY_REF}"
 parameters:
 - description: The name for the application.
   name: APPLICATION_NAME

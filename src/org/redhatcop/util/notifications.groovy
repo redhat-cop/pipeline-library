@@ -3,7 +3,6 @@ package org.redhatcop.util;
 def rocketChatSend(String url, String text, String emoji) {
   echo "Sending rocketchat message: {\"username\":\"Jenkins\",\"icon_emoji\":\"${emoji}\",\"text\": \"${text}\"}"
 
-  //def body = JsonOutput.toJson([username: 'Jenkins', icon_emoji: emoji, text: text])
   // POST Message
   def response = httpRequest url: url,
     httpMode: 'POST',
