@@ -1,6 +1,6 @@
 # Testing the org.redhatcop.util package
 
-This directory contains a test inventory for testing the `org.redhatcop.utils` package in OpenShift. It requires [casl-ansible](https://github.com/redhat-cop/casl-ansible.git) to test.
+This directory contains a test inventory for testing the `org.redhatcop.utils` package in OpenShift. It requires [casl-ansible](https://github.com/redhat-cop/casl-ansible.git) to test. This can be pulled in via ansible-galaxy.
 
 ## Steps to test
 
@@ -17,7 +17,11 @@ This directory contains a test inventory for testing the `org.redhatcop.utils` p
       secret: somehooksecret
     ```
     Where the full rocketchat URL looks like `https://rocketchat.example.com/hooks/somehookid/somehooksecret`.
-3. Run ansible.
+3. Pull in dependencies
     ```
-    ansible-playbook -i ./inventory/ ~/src/casl-ansible/playbooks/openshift-cluster-seed.yml
+    ansible-galaxy install -r requirements.yml -p deps
+    ```
+4. Run ansible.
+    ```
+    ansible-playbook -i .test/org/redhatcop/util/inventory/ deps/casl-ansible/playbooks/openshift-cluster-seed.yml
     ```

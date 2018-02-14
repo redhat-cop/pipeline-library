@@ -1,0 +1,3 @@
+# From 'casl-ansible'
+- src: https://github.com/redhat-cop/casl-ansible
+  version: v3.7.0
