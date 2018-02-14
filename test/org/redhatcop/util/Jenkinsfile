@@ -1,0 +1,38 @@
+/*
+Must create a secret in openshift project with the following:
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rocketchat-secret
+stringData:
+  server: https://rocketchat.example.com
+  key: somehookid
+  secret: somehooksecret
+
+*/
+
+@Library('cop-library') _
+
+podTemplate(label: 'slave-ruby', cloud: 'openshift', serviceAccount: "jenkins", containers: [
+  containerTemplate(name: 'jnlp', image: 'docker.io/redhatcop/jenkins-slave-ruby', privileged: false, alwaysPullImage: true, workingDir: '/tmp', args: '${computer.jnlpmac} ${computer.name}', ttyEnabled: false,
+  envVars: [
+                secretEnvVar(key: 'ROCKETCHAT_SERVER', secretName: 'rocketchat-secret', secretKey: 'server'),
+                secretEnvVar(key: 'ROCKETCHAT_KEY', secretName: 'rocketchat-secret', secretKey: 'key'),
+                secretEnvVar(key: 'ROCKETCHAT_SECRET', secretName: 'rocketchat-secret', secretKey: 'secret')
+          ]
+  )
+]) {
+
+  node ('slave-ruby') {
+    rocketchat_url = "${env.ROCKETCHAT_SERVER}/hooks/${env.ROCKETCHAT_KEY}/${env.ROCKETCHAT_SECRET}"
+    def n = new org.redhatcop.util.notifications()
+
+    stage('Test Notifications') {
+      n.notifyBuild('STARTED', rocketchat_url)
+      n.notifyBuild('FAILED', rocketchat_url)
+      n.notifyBuild('SUCCESSFUL', rocketchat_url)
+    }
+  }
+
+}

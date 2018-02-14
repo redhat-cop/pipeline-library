@@ -1,0 +1,18 @@
+openshift_cluster_content:
+- object: notifications test
+  content:
+  - name: create project
+    file: "{{ inventory_dir }}/../files/projects.yml"
+  - name: create secret
+    file: "{{ inventory_dir }}/../files/rocketchat-secret.yml"
+  - name: build jenkins image
+    template: "{{ inventory_dir }}/../../../../../jenkins-s2i/jenkins-s2i.yml"
+    params: "{{ inventory_dir }}/../files/params/jenkins-s2i.params"
+    namespace: pipeline-library-test
+  - name: deploy jenkins
+    template: "openshift//jenkins-ephemeral"
+    params: "{{ inventory_dir }}/../files/params/jenkins-deployment.params"
+    namespace: pipeline-library-test
+  - name: test pipeline build
+    template: "{{ inventory_dir }}/../files/templates/build-template.yml"
+    params: "{{ inventory_dir }}/../files/params/notifications-build.params"
