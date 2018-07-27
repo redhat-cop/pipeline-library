@@ -1,0 +1,10 @@
+# Cross Cluster Promotion
+
+Promotes container image cross OpenShift clusters using Skopeo.
+Requires a Jenkins Slave container image that include Skopeo tool.
+
+Sample usage:
+
+```
+asdf
+```

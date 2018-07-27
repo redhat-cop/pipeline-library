@@ -1,0 +1,10 @@
+# Tag Imae
+
+Easiest way to copy images between OpenShift projects is to use imagestreams tags.
+This function will issue this tag from source ImageStream to target ImageStream.
+
+Sample usage:
+
+```
+asdf
+```

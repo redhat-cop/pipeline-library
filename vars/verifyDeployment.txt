@@ -1,0 +1,9 @@
+# Verify Deployment
+
+Verifies OpenShift deployment by checking each deployed pods status.
+
+Sample usage:
+
+```
+asdf
+```
