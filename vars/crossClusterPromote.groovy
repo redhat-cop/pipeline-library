@@ -1,18 +1,20 @@
 #!/usr/bin/env groovy
 
 class CopyImageInput implements Serializable{
-	String imageName
-	String imagePath
-	String imageTag = "latest"
-	String imageDestinationTag
-	String imageDestinationPath
+	String sourceImageName
+	String sourceImagePath
+	String sourceImageTag = "latest"
+	String destinationImageName
+	String destinationImageTag
+	String destinationImagePath
 	String targetRegistryCredentials = "other-cluster-credentials"
 	String clusterUrl = ""
 	String clusterToken = ""
 
     CopyImageInput init(){
-        if(!imageDestinationTag?.trim()) imageDestinationTag = imageTag
-        if(!imageDestinationTag?.trim()) imageDestinationPath = imagePath
+		if(!destinationImageName?.trim()) destinationImageName = sourceImageName
+        if(!destinationImageTag?.trim()) destinationImageTag = sourceImageTag
+        if(!destinationImagePath?.trim()) destinationImagePath = sourceImagePath
         return this
     }
 }
@@ -30,10 +32,10 @@ def call(CopyImageInput input) {
 		def token = sh(script:"set +x; echo ${secretData.token} | base64 --decode", returnStdout: true)
 		def username = sh(script:"set +x; echo ${secretData.username} | base64 --decode", returnStdout: true)
 
-		openshift.withProject("${input.imagePath}") {
-			def localRegistry = openshift.selector( "is", "${input.imageName}").object().status.dockerImageRepository
-			def from = "docker://${localRegistry}:${input.imageTag}"
-			def to = "docker://${registry}/${input.imageDestinationPath}/${input.imageName}:${input.imageDestinationTag}"
+		openshift.withProject("${input.sourceImagePath}") {
+			def localRegistry = openshift.selector( "is", "${input.sourceImageName}").object().status.dockerImageRepository
+			def from = "docker://${localRegistry}:${input.sourceImageTag}"
+			def to = "docker://${registry}/${input.destinationImagePath}/${input.destinationImageName}:${input.destinationImageTag}"
 
 			echo "Now Promoting ${from} -> ${to}"
 			sh """

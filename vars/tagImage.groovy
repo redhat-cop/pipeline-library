@@ -9,7 +9,6 @@ class TagImageInput implements Serializable{
   String toImageTag
 
   TagImageInput init(){
-    if(!toImagePath?.trim()) toImagePath = sourceImagePath
     if(!toImageName?.trim()) toImageName = sourceImageName
     if(!toImageTag?.trim()) toImageTag = sourceImageTag
     return this
@@ -21,8 +20,9 @@ def call(Map input){
 }
 
 def call(TagImageInput input) {
-  assert input.sourceImageName?.trim() : "Param sourceImageName should be filled."
-  assert input.sourceImagePath?.trim() : "Param sourceImagePath should be filled."
+  assert input.sourceImageName?.trim() : "Param sourceImageName should be defined."
+  assert input.sourceImagePath?.trim() : "Param sourceImagePath should be defined."
+  assert input.toImageName?.trim() : "Param toImageName should be defined."
 
   openshift.withCluster() {
     openshift.tag("${input.sourceImagePath}/${input.sourceImageName}:${input.sourceImageTag}", "${input.toImagePath}/${input.toImageName}:${input.toImageTag}")
