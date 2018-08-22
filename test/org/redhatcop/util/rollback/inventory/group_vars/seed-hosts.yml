@@ -1,0 +1,19 @@
+openshift_cluster_content:
+- object: rollback test
+  content:
+  - name: create project
+    file: "{{ inventory_dir }}/../files/projects.yml"
+  - name: build jenkins image
+    template: "{{ inventory_dir }}/../../../../../../jenkins-s2i/jenkins-s2i.yml"
+    params: "{{ inventory_dir }}/../files/params/jenkins-s2i"
+    namespace: pipeline-library-test
+  - name: deploy jenkins
+    template: "openshift//jenkins-ephemeral"
+    params: "{{ inventory_dir }}/../files/params/jenkins-deployment"
+    namespace: pipeline-library-test
+  - name: test pipeline deploy
+    template: "{{ inventory_dir }}/../files/templates/deployment.yml"
+    params: "{{ inventory_dir }}/../files/params/deploy"
+  - name: test pipeline build
+    template: "{{ inventory_dir }}/../files/templates/build.yml"
+    params: "{{ inventory_dir }}/../files/params/build"
