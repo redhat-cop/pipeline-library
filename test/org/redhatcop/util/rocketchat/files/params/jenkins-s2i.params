@@ -1,0 +1,3 @@
+JENKINS_GIT_URL=https://github.com/redhat-cop/pipeline-library.git
+JENKINS_GIT_BRANCH=master
+JENKINS_GIT_CONTEXT_DIR=jenkins-s2i/

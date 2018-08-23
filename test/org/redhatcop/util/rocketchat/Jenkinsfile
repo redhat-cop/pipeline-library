@@ -1,6 +1,5 @@
 /*
 Must create a secret in openshift project with the following:
-
 apiVersion: v1
 kind: Secret
 metadata:
@@ -9,7 +8,6 @@ stringData:
   server: https://rocketchat.example.com
   key: somehookid
   secret: somehooksecret
-
 */
 
 @Library('cop-library') _
