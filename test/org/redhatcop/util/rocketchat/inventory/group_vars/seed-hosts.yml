@@ -6,7 +6,7 @@ openshift_cluster_content:
   - name: create secret
     file: "{{ inventory_dir }}/../files/rocketchat-secret.yml"
   - name: build jenkins image
-    template: "{{ inventory_dir }}/../../../../../jenkins-s2i/jenkins-s2i.yml"
+    template: "{{ inventory_dir }}/../../../../../../jenkins-s2i/jenkins-s2i.yml"
     params: "{{ inventory_dir }}/../files/params/jenkins-s2i.params"
     namespace: pipeline-library-test
   - name: deploy jenkins
