@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
 class Rollback implements Serializable {
-	String deploymentConfig
-	String rollbackVersion = ""
-	String clusterUrl = ""
-	String clusterToken = ""
+    String deploymentConfig
+    String rollbackVersion = ""
+    String clusterUrl = ""
+    String clusterToken = ""
 }
 
 def call(Map input) {

@@ -16,7 +16,7 @@ Example with all parameters set:
 ```
 stage {
     steps{
-        tagImage(targetApp: "hello-world", 
+        verifyDeployment(targetApp: "hello-world", 
                  projectName: "example-project", 
                  clusterUrl: "https://master.example.com"
                  clusterToken: "<Openshift token>")
