@@ -1,3 +1,5 @@
-# From 'casl-ansible'
-- src: https://github.com/redhat-cop/casl-ansible
-  version: v3.7.0
+# From 'openshift-applier'
+- src: https://github.com/redhat-cop/openshift-applier
+  scm: git
+  version: v2.0.0
+  name: openshift-applier
