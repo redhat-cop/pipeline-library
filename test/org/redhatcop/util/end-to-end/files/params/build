@@ -1,4 +1,4 @@
 NAMESPACE=pipeline-library-dev
 PIPELINE_REPOSITORY_URL=https://github.com/redhat-cop/pipeline-library.git
-PIPELINE_REPOSITORY_REF=issues-11-to-15
+PIPELINE_REPOSITORY_REF=master
 CONTEXT_DIR=test/org/redhatcop/util/end-to-end
