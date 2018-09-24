@@ -18,7 +18,7 @@ def call (Map input) {
 def call(BinaryBuildInput input) {
     openshift.withCluster() {
         openshift.withProject("${input.projectName}") {
-            openshift.selector("bc", "${input.buildConfigName}").startBuild("--from-dir=${input.artifactsDirectoryName}", "--follow", "--wait")
+            openshift.selector("bc", "${input.buildConfigName}").startBuild("--from-dir=${input.artifactsDirectoryName}", "--wait").logs('-f')
         }        
     }
 }

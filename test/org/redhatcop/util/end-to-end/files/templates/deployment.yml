@@ -4,7 +4,7 @@ labels:
   template: basic-spring-boot
 metadata:
   annotations:
-    description: Application template for JWS applications built using a Jenkins Pipeline
+    description: Application template for JWS applications built using a Jenkins
     iconClass: icon-tomcat
     tags: java,spring
     version: 1.2.0

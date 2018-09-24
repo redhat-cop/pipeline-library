@@ -4,6 +4,12 @@ items:
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
+    name: pipeline-library-dev
+    creationTimestam: null
+  displayName: Pipeline Library Development Project
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
     name: pipeline-library-test
     creationTimestam: null
   displayName: Pipeline Library Testing Project

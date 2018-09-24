@@ -1,4 +1,4 @@
-NAMESPACE=pipeline-library-test
-PIPELINE_REPOSITORY_URL=https://github.com/Gl4di4torRr/pipeline-library.git
-PIPELINE_REPOSITORY_REF=rollback
-CONTEXT_DIR=test/org/redhatcop/util/rollback
+NAMESPACE=pipeline-library-dev
+PIPELINE_REPOSITORY_URL=https://github.com/redhat-cop/pipeline-library.git
+PIPELINE_REPOSITORY_REF=issues-11-to-15
+CONTEXT_DIR=test/org/redhatcop/util/end-to-end

@@ -1,2 +1,2 @@
-NAMESPACE=pipeline-library-test
+NAMESPACE=pipeline-library-dev
 JENKINS_IMAGE_STREAM_TAG=jenkins2-s2i:latest

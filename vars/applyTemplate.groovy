@@ -31,10 +31,10 @@ def call(ApplyTemplateInput input) {
                     def dcSelector = openshift.selector("deploymentconfig/${o.metadata.name}")
                     def foundObjects = dcSelector.exists()
                     if (foundObjects) { 
-                    echo "This DC exists, copying the image value"
-                    def dcObjs = dcSelector.objects( exportable:true )
-                    echo "Image now: ${dcObjs[0].spec.template.spec.containers[0].image}"
-                    o.spec.template.spec.containers[0].image = dcObjs[0].spec.template.spec.containers[0].image
+                        echo "This DC exists, copying the image value"
+                        def dcObjs = dcSelector.objects( exportable:true )
+                        echo "Image now: ${dcObjs[0].spec.template.spec.containers[0].image}"
+                        o.spec.template.spec.containers[0].image = dcObjs[0].spec.template.spec.containers[0].image
                     }
                 }
             }
