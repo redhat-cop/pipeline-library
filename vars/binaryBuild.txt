@@ -1,0 +1,30 @@
+# binaryBuild
+
+This trigger binary build if pointed to BuildConfig with binary -strategy.
+We assume that the image you refer to can import binary artifacts from a directory.
+
+Sample usages:
+
+Assumes that artifacts are in directory called "deploy":
+```
+stage {
+    steps{
+        binaryBuild(projectname: "example", buildConfigName: "hello-world-build")
+    }
+}
+```
+Defined your own artifacts directory:
+```
+stage {
+    steps{
+        binaryBuild(projectname: "example", buildConfigName: "hello-world-build", artifactsDirectoryName: "artifacts")
+    }
+}
+```
+
+Include this library by adding this before "pipeline" in your Jenkins:
+```
+library identifier: "pipeline-library@master", retriever: modernSCM(
+  [$class: "GitSCMSource",
+   remote: "https://github.com/redhat-cop/pipeline-library.git"])
+```

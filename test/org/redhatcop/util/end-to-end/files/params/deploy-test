@@ -1,0 +1,5 @@
+APPLICATION_NAME=spring-rest
+NAMESPACE=pipeline-library-test
+SA_NAMESPACE=pipeline-library-dev
+READINESS_RESPONSE=status.:.UP
+READINESS_PATH=/health
