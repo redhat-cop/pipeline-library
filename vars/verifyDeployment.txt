@@ -18,7 +18,7 @@ stage {
     steps{
         verifyDeployment(targetApp: "hello-world", 
                  projectName: "example-project", 
-                 clusterUrl: "https://master.example.com"
+                 clusterUrl: "https://master.example.com",
                  clusterToken: "<Openshift token>")
     }
 }
