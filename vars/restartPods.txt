@@ -1,0 +1,31 @@
+# restartPods
+
+This function will restart the pods.
+
+Sample usage:
+
+To run against the local:
+```
+stage('Restart') {
+      steps {
+         script {
+            restartPods(projectName: "myproject", targetApp: "mydeploymentconfig")
+         }
+      }
+    }
+```
+
+Run against remote cluster:
+```
+stage {
+    steps{
+        restartPods(projectname: "myproject", targetApp: "mydeploymentconfig", clusterUrl: "https://master.example.com", clusterToken: "KUBERNETES TOKEN")
+    }
+}
+```
+
+Include this library by adding this before "pipeline" in your Jenkins:
+```
+library identifier: "pipeline-library@master", retriever: modernSCM(
+  [$class: "GitSCMSource",
+   remote: "https://github.com/redhat-cop/pipeline-library.git"])
