@@ -18,7 +18,7 @@ def call(RestartPodsInput input) {
 
     openshift.withCluster(input.clusterUrl, input.clusterToken) {
         openshift.withProject(input.projectName) {
-            openshift.selector("dc", input.targetApp).rollout().latest()
+            openshift.selector("rc", input.targetApp).restart()
         }
     }
 }
