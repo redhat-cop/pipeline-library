@@ -6,7 +6,7 @@ class ApplierInput implements Serializable{
     String inventoryPath = ""
     String requirementsPath = ""
     String skipTlsVerify = false
-    String rolesPath - "galaxy"
+    String rolesPath = "galaxy"
     String applierPlaybook = "galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml"
 }
 
