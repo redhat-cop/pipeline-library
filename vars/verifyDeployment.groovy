@@ -5,6 +5,7 @@ class ClusterInput implements Serializable{
     String targetApp
     String clusterUrl = ""
     String clusterToken = ""
+    String secretName = ""
 }
 
 // verify deployment
@@ -13,6 +14,17 @@ def call(Map input) {
 }
 
 def call(ClusterInput input) {
+
+    if (input.secretName.length() > 0) {
+        script {
+            openshift.withCluster() {
+                def secretData = openshift.selector("secret/${input.secretName}").object().data
+                def encodedToken = secretData.token
+                input.clusterToken = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
+            }
+        }
+    }
+
     openshift.withCluster(input.clusterUrl, input.clusterToken) {
         openshift.withProject("${input.projectName}") {
             def dcObj = openshift.selector("dc", input.targetApp).object()
