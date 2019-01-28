@@ -1,7 +1,6 @@
 # binaryBuild
 
 This trigger binary build if pointed to BuildConfig with binary -strategy.
-We assume that the image you refer to can import binary artifacts from a directory.
 
 Sample usages:
 
@@ -17,7 +16,7 @@ Defined your own artifacts directory:
 ```
 stage {
     steps{
-        binaryBuild(projectName: "example", buildConfigName: "hello-world-build", artifactsDirectoryName: "artifacts")
+        binaryBuild(projectName: "example", buildConfigName: "hello-world-build", artifactsDirectoryName: "artifacts", buildFrom "--from-dir")
     }
 }
 ```
