@@ -4,7 +4,7 @@ Patches the build config to add jenkins and git build information.
 
 Parameters:
 
-patchBuildConfigOutputLabes(bcName: String (required), domainPrefix: String (optional))
+patchBuildConfigOutputLabels(bcName: String (required), domainPrefix: String (optional, default: com.redhat))
 
 Sample usage:
 
