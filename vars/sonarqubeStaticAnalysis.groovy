@@ -25,23 +25,17 @@ def call(SonarQubeConfigurationInput input) {
 
     def success = true
     def errorMsg = ''
- 
-    script {
 
-        def scannerHome = tool 'sonar-scanner-tool';
-
-        // Execute the Maven goal sonar:sonar to attempt to generate
-        // the report files.
-        withSonarQubeEnv('sonarqube') {
-            try {
-                sh 'mvn install sonar:sonar'
-            } catch (error) {
-                success = false
-                errorMsg = 'Error executing sonar:sonar goal:' + ex.getMessage()
-            }
- 
+    // Execute the Maven goal sonar:sonar to attempt to generate
+    // the report files.
+    withSonarQubeEnv('sonar') {
+        try {
+            sh 'mvn install sonar:sonar'
+        } catch (error) {
+            success = false
+            errorMsg = 'Error executing sonar:sonar goal:' + ex.getMessage()
         }
- 
+
     }
 
     // Check the quality gate to make sure 
