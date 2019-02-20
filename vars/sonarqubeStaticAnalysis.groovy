@@ -38,6 +38,8 @@ def call(SonarQubeConfigurationInput input) {
 
     }
 
+    print "Maven command executed."
+
     // Check the quality gate to make sure 
     // it is in a passing state.
     def qualitygate = waitForQualityGate()
@@ -46,34 +48,42 @@ def call(SonarQubeConfigurationInput input) {
         errorMsg = "Pipeline aborted due to quality gate failure: ${qualitygate.status}"
     }
 
+    print "Quality Gate checked."
+
     // publish the dependency check html reports
     dependencyCheckReport(input, success)
 
+    print "Dependency Check Report Generated."
+
     // public the unit test html reports
     unitTestReport()
+
+    print "Unit Test Report Generated."
 
     // throw error if anything happened
     if(!success) {
         error errorMsg
     }
 
+    print "Done."
+
 }
 
 def dependencyCheckReport(SonarQubeConfigurationInput input, boolean success) {
 
-    boolean allowMissing = ${input.dependencyCheckKeepAll}
+    boolean allowMissing = input.dependencyCheckKeepAll
 
     if(input.success) {
         allowMissing = false
     }
 
-    report("${input.dependencyCheckReportDir}", "${input.dependencyCheckReportFiles}", "${input.dependencyCheckReportName}", keepAll, ${input.dependencyCheckAlwaysLinkToLastBuild}, ${input.dependencyCheckAllowMissing})
+    report(input.dependencyCheckReportDir, input.dependencyCheckReportFiles, input.dependencyCheckReportName, keepAll, input.dependencyCheckAlwaysLinkToLastBuild, input.dependencyCheckAllowMissing)
 
 }
 
 def unitTestReport(SonarQubeConfigurationInput input) {
 
-    report("${input.unitTestReportDir}", "${input.unitTestReportFiles}", "${input.unitTestReportName}", ${input.unitTestKeepAll}, ${input.unitTestAlwaysLinkToLastBuild}, ${input.unitTestAllowMissing})
+    report(input.unitTestReportDir, input.unitTestReportFiles, input.unitTestReportName, input.unitTestKeepAll, input.unitTestAlwaysLinkToLastBuild, input.unitTestAllowMissing)
 
 }
 
