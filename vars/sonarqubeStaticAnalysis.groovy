@@ -38,7 +38,7 @@ def call(SonarQubeConfigurationInput input) {
 
     }
 
-    print "Maven command executed."
+    println "Maven command executed."
 
     // Check the quality gate to make sure 
     // it is in a passing state.
@@ -48,24 +48,24 @@ def call(SonarQubeConfigurationInput input) {
         errorMsg = "Pipeline aborted due to quality gate failure: ${qualitygate.status}"
     }
 
-    print "Quality Gate checked."
+    println "Quality Gate checked."
 
     // publish the dependency check html reports
     dependencyCheckReport(input, success)
 
-    print "Dependency Check Report Generated."
+    println "Dependency Check Report Generated."
 
     // public the unit test html reports
     unitTestReport()
 
-    print "Unit Test Report Generated."
+    println "Unit Test Report Generated."
 
     // throw error if anything happened
     if(!success) {
         error errorMsg
     }
 
-    print "Done."
+    println "Done."
 
 }
 
@@ -73,7 +73,7 @@ def dependencyCheckReport(SonarQubeConfigurationInput input, boolean success) {
 
     boolean allowMissing = input.dependencyCheckKeepAll
 
-    if(input.success) {
+    if(success) {
         allowMissing = false
     }
 
