@@ -56,7 +56,7 @@ def call(SonarQubeConfigurationInput input) {
     println "Dependency Check Report Generated."
 
     // public the unit test html reports
-    unitTestReport()
+    unitTestReport(input)
 
     println "Unit Test Report Generated."
 
