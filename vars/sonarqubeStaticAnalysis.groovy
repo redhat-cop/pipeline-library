@@ -77,7 +77,7 @@ def dependencyCheckReport(SonarQubeConfigurationInput input, boolean success) {
         allowMissing = false
     }
 
-    report(input.dependencyCheckReportDir, input.dependencyCheckReportFiles, input.dependencyCheckReportName, keepAll, input.dependencyCheckAlwaysLinkToLastBuild, input.dependencyCheckAllowMissing)
+    report(input.dependencyCheckReportDir, input.dependencyCheckReportFiles, input.dependencyCheckReportName, input.dependencyCheckKeepAll, input.dependencyCheckAlwaysLinkToLastBuild, allowMissing)
 
 }
 
