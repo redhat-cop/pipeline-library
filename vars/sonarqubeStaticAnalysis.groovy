@@ -78,7 +78,7 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
 
         String url = input.buildServerWebHookUrl
 
-        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" http://sonarqube:9000/api/webhooks/list | grep $url")
+        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" http://sonarqube:9000/api/webhooks/list | grep jenkins")
 
         println "The returned value is: $retVal"
 
