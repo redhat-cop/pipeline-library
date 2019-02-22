@@ -2,6 +2,7 @@
 
 class SonarQubeConfigurationInput implements Serializable {
 
+    String buildServerWebHookUrl = ""
     String dependencyCheckReportDir = 'target'
     String dependencyCheckReportFiles = 'dependency-check-report.html'
     String dependencyCheckReportName = 'OWASP Dependency Check Report'
@@ -25,6 +26,8 @@ def call(SonarQubeConfigurationInput input) {
 
     def success = true
     def errorMsg = ''
+
+    checkForBuildServerWebHook(input)
 
     // Execute the Maven goal sonar:sonar to attempt to generate
     // the report files.
@@ -66,6 +69,18 @@ def call(SonarQubeConfigurationInput input) {
     }
 
     println "Done."
+
+}
+
+def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
+
+    withSonarQubeEnv('sonarqube') {
+
+        String url = input.buildServerWebHookUrl
+
+        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" http://sonarqube.sonarqube.svc:9000/api/webhooks/list | grep Jenkins")
+
+        println "The returned value is: $retVal"
 
 }
 
