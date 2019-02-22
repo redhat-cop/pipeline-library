@@ -77,16 +77,16 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
 
     withSonarQubeEnv('sonar') {
 
-        println 'Validating webhook with name ${input.buildServerWebHookName} and url "${input.buildServerWebHookUrl}" exists...'
-        def retVal = sh(returnStatus: true, script: 'curl -k -u "${SONAR_AUTH_TOKEN}:" http://sonarqube:9000/api/webhooks/list | grep ${input.buildServerWebHookUrl}')
+        println "Validating webhook with name ${input.buildServerWebHookName} and url ${input.buildServerWebHookUrl} exists..."
+        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" http://sonarqube:9000/api/webhooks/list | grep ${input.buildServerWebHookUrl}")
         println "Return Value is $retVal"
 
         // webhook was not found
         // create the webhook - this should be more likely be part
         // of the sonarqube configuration automation
         if(retVal == 1) {
-            println 'No webhook found with name ${input.buildServerWebHookName}.  Attempting to create with url "${input.buildServerWebHookUrl}"'
-            sh 'curl -k -X POST -u "${SONAR_AUTH_TOKEN}:" -F "name=${input.buildServerWebHookName}" -F "url=${input.buildServerWebHookUrl}" http://sonarqube:9000/api/webhooks/create'
+            println "No webhook found with name ${input.buildServerWebHookName}.  Attempting to create with url ${input.buildServerWebHookUrl}"
+            sh "curl -k -X POST -u \"${SONAR_AUTH_TOKEN}:\" -F \"name=${input.buildServerWebHookName}\" -F \"url=${input.buildServerWebHookUrl}\" http://sonarqube:9000/api/webhooks/create"
         }
 
         // Error happened when trying to find the webhook.  Not sure if it exists
