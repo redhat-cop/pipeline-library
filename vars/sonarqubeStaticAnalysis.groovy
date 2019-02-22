@@ -82,6 +82,8 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
 
         println "The returned value is: $retVal"
 
+    }
+
 }
 
 def dependencyCheckReport(SonarQubeConfigurationInput input, boolean success) {
