@@ -35,6 +35,9 @@ def call(SonarQubeConfigurationInput input) {
     withSonarQubeEnv('sonar') {
         try {
             sh 'mvn install sonar:sonar'
+
+            sh 'ls -la target'
+
         } catch (error) {
             success = false
             errorMsg = 'Error executing sonar:sonar goal:' + ex.getMessage()
