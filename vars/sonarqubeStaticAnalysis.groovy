@@ -2,6 +2,7 @@
 
 class SonarQubeConfigurationInput implements Serializable {
 
+    String pomFile = "pom.xml"
     String buildServerWebHookName
     String buildServerWebHookUrl
     String dependencyCheckReportDir = 'target'
@@ -34,13 +35,13 @@ def call(SonarQubeConfigurationInput input) {
     // the report files.
     withSonarQubeEnv('sonar') {
         try {
-            sh 'mvn install sonar:sonar'
+            sh 'mvn install sonar:sonar -f ${POM_FILE}'
 
             sh 'ls -la target'
 
         } catch (error) {
             success = false
-            errorMsg = 'Error executing sonar:sonar goal:' + ex.getMessage()
+            errorMsg = 'Error executing sonar:sonar goal:' + error.getMessage()
         }
 
     }
