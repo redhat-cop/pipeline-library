@@ -40,8 +40,8 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
 
     withSonarQubeEnv('sonar') {
 
-        println "Validating webhook with name ${input.buildServerWebHookName} and url ${input.buildServerWebHookUrl} exists..."
-        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" http://sonarqube:9000/api/webhooks/list | grep ${input.buildServerWebHookUrl}")
+        println "Validating webhook with name ${input.buildServerWebHookName} exists..."
+        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" http://sonarqube:9000/api/webhooks/list | grep ${input.buildServerWebHookName}")
         println "Return Value is $retVal"
 
         // webhook was not found
