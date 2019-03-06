@@ -3,8 +3,7 @@
 class SonarQubeConfigurationInput implements Serializable {
 
     String pomFile = "pom.xml"
-    String buildServerWebHookName
-    String buildServerWebHookUrl
+    String buildServerWebHookName = "jenkins"
 
 }
 
@@ -21,7 +20,7 @@ def call(SonarQubeConfigurationInput input) {
     // the report files.
     withSonarQubeEnv('sonar') {
         try {
-            sh 'mvn install sonar:sonar -f ${POM_FILE}'
+            sh 'mvn sonar:sonar -f ${POM_FILE}'
         } catch (error) {
             error error.getMessage()
         }
@@ -49,8 +48,7 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
         // create the webhook - this should be more likely be part
         // of the sonarqube configuration automation
         if(retVal == 1) {
-            println "No webhook found with name ${input.buildServerWebHookName}.  Attempting to create with url ${input.buildServerWebHookUrl}"
-            sh "curl -k -X POST -u \"${SONAR_AUTH_TOKEN}:\" -F \"name=${input.buildServerWebHookName}\" -F \"url=${input.buildServerWebHookUrl}\" http://sonarqube:9000/api/webhooks/create"
+            error "No webhook found with name ${input.buildServerWebHookName}.  Please create one in SonarQube."
         }
 
         // Error happened when trying to find the webhook.  Not sure if it exists
