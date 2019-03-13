@@ -3,7 +3,9 @@
 This function will validate that a build server webhook has been configured in 
 SonarQube, run the sonar:sonar maven goal for the configured pom file, and then 
 wait for the quality gate status to be OK.  The pipeline will be stopped if the
-webhook has not been configured or the quality gate fails.
+webhook has not been configured or the quality gate fails. Be advised that the 
+SonarQube deployment @ https://github.com/redhat-cop/containers-quickstarts/tree/master/sonarqube
+will create this webhook for you.
 
 Sample usage:
 
