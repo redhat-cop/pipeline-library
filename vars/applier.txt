@@ -5,7 +5,7 @@ Applier executes templates on a specified cluster.
 Parameters:
 
 applier(secretName: String (required),
-        registryUrl: String (required),
+        clusterURL: String (required),
         inventoryPath: String (required),
         requirementsPath: String (required),
         skipTlsVerify: boolean (optional))
@@ -26,7 +26,7 @@ podTemplate(label: 'applier', cloud: 'openshift', containers: [
 
     stage ("Run Applier") {
         applier(secretName: "mysecret", 
-                registryUrl: "https://myregistry.com",
+                clusterURL: "https://ocp.example.com",
                 inventoryPath: ".applier/inventory",
                 requirementsPath: ".applier/requirements.yml",
                 skipTlsVerify: true )
