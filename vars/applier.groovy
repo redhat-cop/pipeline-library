@@ -28,7 +28,7 @@ def call(ApplierInput input) {
             env.TOKEN = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
         }
 
-        def fTags = input?.filterTags ? " -e ${input.filterTags} " : ""
+        def fTags = input?.filterTags ? " -e filter_tags=${input.filterTags} " : ""
 
         sh """
             oc login ${input.registryUrl} --token=${env.TOKEN} --insecure-skip-tls-verify=${input.skipTlsVerify}
