@@ -2,7 +2,7 @@
 
 class ApplierInput implements Serializable{
     String secretName = ""
-    String registryUrl = ""
+    String clusterURL = ""
     String inventoryPath = ""
     String requirementsPath = ""
     String skipTlsVerify = false
@@ -16,7 +16,7 @@ def call(Map input) {
 
 def call(ApplierInput input) {
     assert input.secretName?.trim() : "Param secretName should be defined."
-    assert input.registryUrl?.trim() : "Param registryUrl should be defined."
+    assert input.clusterURL?.trim() : "Param clusterURL should be defined."
     assert input.inventoryPath?.trim() : "Param inventoryPath should be defined."
     assert input.requirementsPath?.trim() : "Param requirementsPath should be defined."
 
@@ -28,7 +28,7 @@ def call(ApplierInput input) {
         }
 
         sh """
-            oc login ${input.registryUrl} --token=${env.TOKEN} --insecure-skip-tls-verify=${input.skipTlsVerify}
+            oc login ${input.clusterURL} --token=${env.TOKEN} --insecure-skip-tls-verify=${input.skipTlsVerify}
             ansible-galaxy install --role-file=${input.requirementsPath} --roles-path=${input.rolesPath}
             ansible-playbook -i ${input.inventoryPath} ${input.applierPlaybook}
         """
