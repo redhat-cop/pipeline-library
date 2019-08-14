@@ -28,13 +28,13 @@ def call(BuildAndTagInput input) {
     lock("ocp-buildconfig-${input.imageNamespace}-${input.imageName}") {
         container('jenkins-worker-image-mgmt') {
             script {
-                binaryBuildFromFile(
+                binaryBuild([
                     clusterAPI     : input.clusterAPI,
                     clusterToken   : input.clusterToken,
                     projectName    : input.buildProjectName,
                     buildConfigName: input.imageName,
-                    fromFilePath   : input.fromFilePath
-                )
+                    buildFromPath   : input.fromFilePath
+                ])
 
                 echo "Tag for Build"
                 sh """
