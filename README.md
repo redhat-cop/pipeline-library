@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/redhat-cop/pipeline-library.svg?branch=master)](https://travis-ci.org/redhat-cop/pipeline-library)
+[![License](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)]()
+
 # OpenShift Pipeline Library
 
 ## What This Repo Is

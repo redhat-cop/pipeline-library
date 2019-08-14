@@ -1,0 +1,15 @@
+dist: xenial
+language: java
+jdk:
+  - openjdk8
+
+install:
+  - mvn -N io.takari:maven:wrapper -Dmaven=3.6.0
+  - java -version && javac -version && ./mvnw -version -B
+
+script:
+  - ./mvnw clean install -B
+
+cache:
+  directories:
+    - $HOME/.m2
