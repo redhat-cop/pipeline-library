@@ -1,0 +1,62 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def dockerRegistry
+
+node("maven") {
+    stage("SETUP: Check imagestream doesnt exist") {
+        openshift.withCluster() {
+            openshift.withProject("openshift") {
+                def imageStream = openshift.selector("is", "jenkins")
+                dockerRegistry = sh(returnStdout: true, script: "echo '${imageStream.object().status.dockerImageRepository}' | cut -d '/' -f1").trim()
+            }
+        }
+
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
+                try {
+                    openshift.newProject("pipelinelib-promotion-testing")
+                } catch(ex) {
+                    echo "Ignoring new-project error: ${ex}"
+                }
+
+                openshift.withProject("pipelinelib-promotion-testing") {
+                    def imageStream = openshift.selector("is", "jenkins-slave-image-mgmt")
+                    if (imageStream.exists()) {
+                        imageStream.delete()
+                    }
+                }
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can promote image from one project to another") {
+        imageMirror([
+                sourceSecret           : "pipelinelib-testing-my-token",
+                sourceRegistry         : "https://${dockerRegistry}",
+                destinationSecret      : "pipelinelib-testing-my-token",
+                destinationRegistry    : "https://${dockerRegistry}",
+                insecure               : "true",
+                sourceNamespace        : "pipelinelib-testing",
+                destinationNamespace   : "pipelinelib-promotion-testing",
+                sourceImage            : "jenkins-slave-image-mgmt",
+                sourceImageVersion     : "latest",
+                destinationImageVersion: "latest"
+        ])
+    }
+
+    stage("ASSERT") {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
+                openshift.withProject("pipelinelib-promotion-testing") {
+                    def imageStream = openshift.selector("is", "jenkins-slave-image-mgmt")
+                    imageStream.untilEach(1) {
+                        return it.object().status?.tags?.size() == 1
+                    }
+                }
+            }
+        }
+    }
+}

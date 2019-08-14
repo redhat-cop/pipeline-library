@@ -1,0 +1,76 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def dockerRegistry
+def firstBuildVersion
+
+podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image-mgmt", volumes: [
+        secretVolume(mountPath: "/var/run/secrets/kubernetes.io/dockerconfigjson", secretName: "local-registry")
+]) {
+    node("jnlp") {
+        stage("SETUP: Create build files") {
+            openshift.withCluster() {
+                openshift.withProject("openshift") {
+                    def imageStream = openshift.selector("is", "jenkins")
+                    dockerRegistry = sh(returnStdout: true, script: "echo '${imageStream.object().status.dockerImageRepository}' | cut -d '/' -f1").trim()
+                }
+            }
+
+            openshift.withCluster() {
+                openshift.withProject() {
+                    def buildConfig = openshift.selector("bc", "sample-build")
+                    if (!buildConfig.exists()) {
+                        openshift.apply("-f", "https://raw.githubusercontent.com/openshift/origin/v3.11.0/test/extended/testdata/builds/test-build.yaml")
+                    }
+
+                    try {
+                        def patch = '{"apiVersion":"build.openshift.io/v1","kind":"BuildConfig","metadata":{"name":"sample-build"},"spec":{"output":{"to":{"kind":"ImageStreamTag","name":"sample-build:latest"}}}}'
+                        openshift.patch(buildConfig.object(), "'" + patch + "'")
+                    } catch(ex) {
+                        echo "Ignoring patch error: ${ex}"
+                    }
+
+                    def buildConfigObject = buildConfig.object()
+                    firstBuildVersion = buildConfigObject.status?.lastVersion
+
+                    def imageStream = openshift.selector("is", "sample-build")
+                    if (!imageStream.exists()) {
+                        openshift.create("imagestream", "sample-build")
+                    }
+                }
+            }
+
+            dir("target") {
+                writeFile file: "HelloWorld.txt", text: "HelloWorld"
+            }
+
+            openshift.logLevel(10)
+        }
+
+        stage("TEST: Can build and tag") {
+            buildAndTag([
+                    imageName     : "sample-build",
+                    fromFilePath  : "${WORKSPACE}/target/",
+                    registryFQDN  : "${dockerRegistry}",
+                    imageNamespace: "pipelinelib-testing",
+                    imageVersion  : "v2",
+                    buildProjectName: "pipelinelib-testing"
+
+            ])
+        }
+
+        stage("ASSERT") {
+            openshift.withCluster() {
+                openshift.withProject() {
+                    def build = openshift.selector("build", "sample-build-${firstBuildVersion + 1}")
+                    assert build.exists()
+
+                    def imageStream = openshift.selector("is", "sample-build")
+                    imageStream.untilEach(1) {
+                        return it.object().status?.tags?.size() == 2
+                    }
+                }
+            }
+        }
+    }
+}

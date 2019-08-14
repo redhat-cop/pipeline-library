@@ -1,0 +1,26 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("TEST: Can tag image") {
+        tagImage([
+                sourceImagePath: "openshift",
+                sourceImageName: "jenkins",
+                sourceImageTag : "2",
+                toImagePath: "pipelinelib-testing",
+                toImageName    : "tagimage",
+                toImageTag     : "2"
+        ])
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def imageStream = openshift.selector("is", "tagimage")
+                imageStream.untilEach(1) {
+                    return it.object().status?.tags?.size() == 1
+                }
+            }
+        }
+    }
+}

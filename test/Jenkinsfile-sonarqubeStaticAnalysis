@@ -1,0 +1,94 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def jenkinsUrl
+
+node("jenkins-slave-ansible") {
+    stage("SETUP: Deploy sonarqube via applier") {
+        sh "git clone https://github.com/redhat-cop/containers-quickstarts.git"
+
+        openshift.withCluster() {
+            openshift.withProject() {
+                def jenkinsRoute = openshift.selector("route", "jenkins")
+                jenkinsUrl = "https://" + jenkinsRoute.object().spec?.host
+            }
+        }
+        
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            applier([
+                    inventoryPath         : ".applier/hosts",
+                    requirementsPath      : "requirements.yml",
+                    ansibleRootDir        : "${WORKSPACE}/containers-quickstarts/sonarqube",
+                    applierPlaybook       : "galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml",
+                    playbookAdditionalArgs: "-e jenkins_url=${jenkinsUrl}",
+                    clusterAPI            : "https://kubernetes.default.svc",
+                    clusterToken          : "${TOKEN}"
+            ])
+        }
+
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
+                openshift.withProject("sonarqube") {
+                    def dbDeployment = openshift.selector("dc", "sonardb")
+                    dbDeployment.rollout().status("--watch=true")
+
+                    def sonarDeployment = openshift.selector("dc", "sonarqube")
+
+                    try {
+                        def patch = '{"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","metadata":{"name":"sonarqube"},"spec":{"template":{"spec":{"containers":[{"name":"sonarqube","livenessProbe":{"initialDelaySeconds":180},"readinessProbe":{"initialDelaySeconds":180}}]}}}}'
+                        openshift.patch(sonarDeployment.object(), "'" + patch + "'")
+                    } catch (ex) {
+                        echo "Ignoring patch error: ${ex}"
+                    }
+
+                    //Can be very flaky when following out..
+                    retry(3) {
+                        try {
+                            sonarDeployment.rollout().status("--watch=true")
+                        } catch(ex) {
+                            sonarDeployment.rollout().latest()
+
+                            error "Ignoring rollout error: ${ex}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    stage("SETUP: Configure sonarqube") {
+        sh "git clone https://github.com/redhat-cop/pipeline-library.git"
+
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
+                openshift.withProject("sonarqube") {
+                    def route = openshift.selector("route", "sonarqube")
+                    def sonarUrl = "https://" + route.object().spec?.host
+
+                    writeFile file: "token.json", text: sh(returnStdout: true, script: "curl -L -X POST -u admin:admin ${sonarUrl}/api/user_tokens/generate?name=jenkins-b${env.BUILD_NUMBER}")
+                    def sonarqubeToken = readJSON file: "token.json"
+
+                    sh """
+                        sed -i 's|def SONAR_URL|def SONAR_URL = "${sonarUrl}"|' ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy
+                        sed -i 's|def SONAR_TOKEN|def SONAR_TOKEN = "${sonarqubeToken.token}"|' ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy
+
+                        curl --header "Authorization: Bearer ${TOKEN}" --data-urlencode "script=\$(< ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy)" ${jenkinsUrl}/scriptText
+                        """
+                }
+            }
+        }
+    }
+}
+
+node("maven") {
+    stage("TEST: Can run sonarqube static analysis") {
+        sh "git clone https://github.com/redhat-cop/pipeline-library.git"
+
+        dir ("pipeline-library") {
+            sonarqubeStaticAnalysis([
+                    pomFile: "pom.xml",
+                    buildServerWebHookName: "jenkins"
+            ])
+        }
+    }
+}

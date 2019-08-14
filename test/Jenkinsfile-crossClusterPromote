@@ -1,0 +1,45 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("jenkins-slave-image-mgmt") {
+    stage("SETUP: Check imagestream doesnt exist") {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
+                try {
+                    openshift.newProject("pipelinelib-promotion-testing")
+                } catch(ex) {
+                    echo "Ignoring new-project error: ${ex}"
+                }
+
+                openshift.withProject("pipelinelib-promotion-testing") {
+                    def imageStream = openshift.selector("is", "jenkins-slave-ansible")
+                    if (imageStream.exists()) {
+                        imageStream.delete()
+                    }
+                }
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can promote image from one project to another") {
+        crossClusterPromote([
+                sourceImageName          : "jenkins-slave-ansible",
+                sourceImagePath          : "pipelinelib-testing",
+                destinationImagePath     : "pipelinelib-promotion-testing",
+                targetRegistryCredentials: "local-registry-generic"
+        ])
+    }
+
+    stage("ASSERT") {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
+                openshift.withProject("pipelinelib-promotion-testing") {
+                    def imageStream = openshift.selector("is", "jenkins-slave-ansible")
+                    assert imageStream.exists()
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,31 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=verifydeployment", "-p DATABASE_SERVICE_NAME=verifydeployment")
+                openshift.apply(model)
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can verify deployment") {
+        verifyDeployment([
+                targetApp: "verifydeployment",
+                projectName: "pipelinelib-testing"
+        ])
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def deployment = openshift.selector("dc", "verifydeployment")
+                deployment.rollout().status("--watch=true")
+            }
+        }
+    }
+}

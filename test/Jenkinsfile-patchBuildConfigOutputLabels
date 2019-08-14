@@ -1,0 +1,36 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create build files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def buildConfig = openshift.selector("bc", "sample-verbose-build")
+                if (!buildConfig.exists()) {
+                    openshift.apply("-f", "https://raw.githubusercontent.com/openshift/origin/v3.11.0/test/extended/testdata/builds/test-build.yaml")
+                }
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can patch build config") {
+        patchBuildConfigOutputLabels([
+                bcName      : "sample-verbose-build",
+                domainPrefix: "org.example"
+        ])
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def buildConfig = openshift.selector("bc", "sample-verbose-build")
+                assert buildConfig.exists()
+
+                def imageLabels = buildConfig.object().spec.output?.imageLabels
+                assert imageLabels != null
+            }
+        }
+    }
+}

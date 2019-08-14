@@ -1,0 +1,65 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def dockerRegistry
+
+podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image-mgmt", volumes: [
+        secretVolume(mountPath: "/var/run/secrets/kubernetes.io/dockerconfigjson", secretName: "local-registry")
+]) {
+    node("jnlp") {
+        stage("SETUP: Create build/deployment files") {
+
+            openshift.withCluster() {
+                openshift.withProject("openshift") {
+                    def imageStream = openshift.selector("is", "jenkins")
+                    dockerRegistry = sh(returnStdout: true, script: "echo '${imageStream.object().status.dockerImageRepository}' | cut -d '/' -f1").trim()
+                }
+            }
+
+            openshift.withCluster() {
+                openshift.withProject() {
+                    def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=taganddeploy", "-p DATABASE_SERVICE_NAME=taganddeploy")
+                    openshift.apply(model)
+
+                    openshift.selector("bc", "taganddeploy").startBuild("--wait")
+
+                    def imageStream = openshift.selector("is", "taganddeploy")
+                    imageStream.untilEach(1) {
+                        return it.object().status?.tags?.size() > 0
+                    }
+
+                    def deployment = openshift.selector("dc", "taganddeploy")
+                    deployment.rollout().status("--watch=true")
+                }
+            }
+
+            openshift.logLevel(10)
+        }
+
+        stage("TEST: Can tag and deploy") {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+                tagAndDeploy([
+                        registryFQDN               : "${dockerRegistry}",
+                        imageNamespace             : "pipelinelib-testing",
+                        imageName                  : "taganddeploy",
+                        imageVersion               : "latest",
+                        deployDestinationVersionTag: "v2",
+                        deployDestinationProjectName: "pipelinelib-testing",
+                        clusterAPI: "https://kubernetes.default.svc",
+                        clusterToken: "${TOKEN}"
+                ])
+            }
+        }
+
+        stage("ASSERT") {
+            openshift.withCluster() {
+                openshift.withProject() {
+                    def imageStream = openshift.selector("is", "taganddeploy")
+                    imageStream.untilEach(1) {
+                        return it.object().status?.tags?.size() == 2
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,50 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def firstBuildVersion
+
+node("maven") {
+    stage("SETUP: Create build files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def buildConfig = openshift.selector("bc", "sample-build-binary")
+                if (!buildConfig.exists()) {
+                    openshift.apply("-f", "https://raw.githubusercontent.com/openshift/origin/v3.11.0/test/extended/testdata/builds/test-build.yaml")
+                }
+
+                def buildConfigObject = buildConfig.object()
+                firstBuildVersion = buildConfigObject.status?.lastVersion
+            }
+        }
+
+        dir("build") {
+            dockerfile = """
+                    FROM scratch
+                    COPY README.md /
+                    """
+
+            writeFile file: "README.md", text: "Test file"
+            writeFile file: "Dockerfile", text: dockerfile
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can build using from-file") {
+        binaryBuild([
+                buildConfigName: "sample-build-binary",
+                buildFromFlag  : "--from-dir",
+                buildFromPath  : "${WORKSPACE}/build/",
+                projectName: "pipelinelib-testing"
+        ])
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def build = openshift.selector("build", "sample-build-binary-${firstBuildVersion + 1}")
+                assert build.exists()
+            }
+        }
+    }
+}
