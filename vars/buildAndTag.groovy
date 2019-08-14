@@ -25,26 +25,20 @@ def call(BuildAndTagInput input) {
     assert input.buildProjectName?.trim() : "Param buildProjectName should be defined."
     assert input.fromFilePath?.trim()     : "Param fromFilePath should be defined."
 
-    lock("ocp-buildconfig-${input.imageNamespace}-${input.imageName}") {
-        container('jenkins-worker-image-mgmt') {
-            script {
-                binaryBuild([
-                    clusterAPI     : input.clusterAPI,
-                    clusterToken   : input.clusterToken,
-                    projectName    : input.buildProjectName,
-                    buildConfigName: input.imageName,
-                    buildFromPath   : input.fromFilePath
-                ])
+    binaryBuild([
+        clusterAPI     : input.clusterAPI,
+        clusterToken   : input.clusterToken,
+        projectName    : input.buildProjectName,
+        buildConfigName: input.imageName,
+        buildFromPath   : input.fromFilePath
+    ])
 
-                echo "Tag for Build"
-                sh """
-                    skopeo copy  \
-                        --authfile /var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson \
-                        --src-tls-verify=${input.tagSourceTLSVerify} \
-                        --dest-tls-verify=${input.tagDestinationTLSVerify} \
-                        docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:latest docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:${input.imageVersion}
-                """
-            }
-        }
-    }
+    echo "Tag for Build"
+    sh """
+        skopeo copy  \
+            --authfile /var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson \
+            --src-tls-verify=${input.tagSourceTLSVerify} \
+            --dest-tls-verify=${input.tagDestinationTLSVerify} \
+            docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:latest docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:${input.imageVersion}
+    """
 }
