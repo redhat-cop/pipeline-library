@@ -21,6 +21,9 @@ def call(Map input) {
 def call(ApplierInput input) {
     assert input.inventoryPath?.trim() : "Param inventoryPath should be defined."
     assert input.requirementsPath?.trim() : "Param requirementsPath should be defined."
+
+    def clusterAPI
+    def clusterToken
     
     // if secretName is given then get cluster token from there
     // else use given clusterToken
