@@ -43,7 +43,9 @@ def call(ApplierInput input) {
     }
 
     openshift.withCluster(clusterAPI, clusterToken) {
-        script {
+        openshift.withProject() {
+            openshift.raw("login")
+
             sh """
                 pushd ${input.ansibleRootDir}
                 ansible-galaxy install --role-file=${input.requirementsPath} --roles-path=${input.rolesPath}
