@@ -32,7 +32,7 @@ def call(ApplyTemplateInput input) {
                     def foundObjects = dcSelector.exists()
                     if (foundObjects) { 
                         echo "This DC exists, copying the image value"
-                        def dcObjs = dcSelector.objects( exportable:true )
+                        def dcObjs = dcSelector.objects()
                         echo "Image now: ${dcObjs[0].spec.template.spec.containers[0].image}"
                         o.spec.template.spec.containers[0].image = dcObjs[0].spec.template.spec.containers[0].image
                     }
