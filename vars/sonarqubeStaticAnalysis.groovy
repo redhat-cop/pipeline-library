@@ -20,7 +20,7 @@ def call(SonarQubeConfigurationInput input) {
     // the report files.
     withSonarQubeEnv('sonar') {
         try {
-            sh 'mvn sonar:sonar -f ${POM_FILE}'
+            sh "mvn sonar:sonar -f ${input.pomFile}"
         } catch (error) {
             error error.getMessage()
         }
@@ -41,7 +41,7 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
     withSonarQubeEnv('sonar') {
 
         println "Validating webhook with name ${input.buildServerWebHookName} exists..."
-        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" http://sonarqube:9000/api/webhooks/list | grep ${input.buildServerWebHookName}")
+        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" ${SONAR_HOST_URL}/api/webhooks/list | grep ${input.buildServerWebHookName}")
         println "Return Value is $retVal"
 
         // webhook was not found
