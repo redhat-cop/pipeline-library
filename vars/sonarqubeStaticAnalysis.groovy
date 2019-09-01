@@ -41,20 +41,20 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
     withSonarQubeEnv('sonar') {
 
         println "Validating webhook with name ${input.buildServerWebHookName} exists..."
-        def retVal = sh(returnStatus: true, script: "curl -k -u \"${SONAR_AUTH_TOKEN}:\" ${SONAR_HOST_URL}/api/webhooks/list | grep ${input.buildServerWebHookName}")
+        def retVal = sh(returnStdout: true, script: "curl -k -u '${SONAR_AUTH_TOKEN}:' ${SONAR_HOST_URL}/api/webhooks/list")
         println "Return Value is $retVal"
+
+        def tmpfile = "/tmp/sonarwebhooks-${java.util.UUID.randomUUID()}.json"
+        writeFile file: tmpfile, text: retVal
+        
+        def webhooksObj = readJSON file: tmpfile
+        def foundHook = webhooksObj?.webhooks?.find { it.name.equalsIgnoreCase(input.buildServerWebHookName) }
 
         // webhook was not found
         // create the webhook - this should be more likely be part
         // of the sonarqube configuration automation
-        if(retVal == 1) {
+        if(foundHook == null) {
             error "No webhook found with name ${input.buildServerWebHookName}.  Please create one in SonarQube."
-        }
-
-        // Error happened when trying to find the webhook.  Not sure if it exists
-        // so stopping so the pipeline doesn't hang waiting for the quality gate.
-        if(retVal == 2) {
-            error "Could not determine if the build server webhook was configured.  stopping to avoid hanging while waiting for quality gate."
         }
 
         println "Build Server Webhook found.  Continuing SonarQube analysis."
