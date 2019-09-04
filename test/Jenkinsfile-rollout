@@ -1,0 +1,49 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def firstDeploymentVersion
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=rollout", "-p DATABASE_SERVICE_NAME=rollout")
+                openshift.apply(model)
+
+                openshift.selector("bc", "rollout").startBuild("--wait")
+
+                def deployment = openshift.selector("dc", "rollout")
+                deployment.rollout().status("--watch=true")
+
+                firstDeploymentVersion = deployment.object().status.latestVersion
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can rollout to latest version") {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            rollout([
+                    deploymentConfigName: "rollout",
+                    projectName         : "pipelinelib-testing",
+                    clusterAPI          : "https://kubernetes.default.svc",
+                    clusterToken        : "${TOKEN}"
+            ])
+        }
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def nextRcNumber = firstDeploymentVersion + 1
+
+                def deployment = openshift.selector("dc", "rollout")
+                assert deployment.object().status.latestVersion == nextRcNumber
+
+                def rc = openshift.selector("rc", "rollout-${nextRcNumber}")
+                assert rc.exists()
+            }
+        }
+    }
+}

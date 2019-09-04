@@ -1,0 +1,39 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def configMapData
+
+node("maven") {
+    stage("SETUP: Create configmap") {
+        def configMap = """
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: game-config
+            data:
+              game.properties: |
+                enemies=aliens
+            """
+
+        writeFile file: "configmap-example.yml", text: configMap
+
+        openshift.withCluster() {
+            openshift.withProject() {
+                openshift.apply("-f", "configmap-example.yml")
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can get configmap data") {
+        configMapData = configMap([
+                configMapName: "game-config",
+                projectName: "pipelinelib-testing"
+        ])
+    }
+
+    stage("ASSERT") {
+        assert configMapData != null
+    }
+}

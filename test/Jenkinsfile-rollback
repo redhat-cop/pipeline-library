@@ -1,0 +1,61 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+def firstDeploymentVersion
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=rollback", "-p DATABASE_SERVICE_NAME=rollback")
+                openshift.apply(model)
+
+                openshift.selector("bc", "rollback").startBuild("--wait")
+
+                def deployment = openshift.selector("dc", "rollback")
+                deployment.rollout().status("--watch=true")
+
+                firstDeploymentVersion = deployment.object().status.latestVersion
+
+                def patch = '{"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","metadata":{"name":"rollback"},"spec":{"template":{"metadata":{"labels":{"version":"v2"}}}}}'
+                openshift.patch(deployment.object(), "'" + patch + "'")
+
+                //Wait for v2
+                deployment.rollout().status("--watch=true")
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can rollback to earlier version") {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+            rollback([
+                    deploymentConfig: "dc/rollback",
+                    clusterUrl      : "https://kubernetes.default.svc",
+                    clusterToken    : "${TOKEN}"
+            ])
+        }
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def deployment = openshift.selector("dc", "rollback")
+                deployment.rollout().status("--watch=true")
+
+                def first = openshift.selector("rc", "rollback-${firstDeploymentVersion}")
+                assert first.exists()
+                assert first.object().spec.template.metadata.labels.version == null
+
+                def second = openshift.selector("rc", "rollback-${firstDeploymentVersion + 1}")
+                assert second.exists()
+                assert second.object().spec.template.metadata.labels.version == "v2"
+
+                def third = openshift.selector("rc", "rollback-${firstDeploymentVersion + 2}")
+                assert third.exists()
+                assert third.object().spec.template.metadata.labels.version == null
+            }
+        }
+    }
+}
