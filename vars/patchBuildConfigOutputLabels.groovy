@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 // When using the non-declarative pipeline, git env variables need to be set through scm checkout
 class PatchBuildConfigOutputLabelsInput implements Serializable{
     String domainPrefix = "com.redhat"
