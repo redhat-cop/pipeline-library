@@ -4,19 +4,20 @@ This trigger binary build if pointed to BuildConfig with binary -strategy.
 
 Sample usages:
 
-Assumes that artifacts are in directory called "deploy":
+Build from directory
 ```
 stage {
     steps{
-        binaryBuild(projectName: "example", buildConfigName: "hello-world-build")
+        binaryBuild(projectName: "example", buildConfigName: "hello-world-build", buildFromPath: "artifacts")
     }
 }
 ```
-Defined your own artifacts directory:
+
+Build from file
 ```
 stage {
     steps{
-        binaryBuild(projectName: "example", buildConfigName: "hello-world-build", artifactsDirectoryName: "artifacts", buildFrom "--from-dir")
+        binaryBuild(projectName: "example", buildConfigName: "hello-world-build", buildFromPath: "artifacts", buildFromFlag: "--from-file")
     }
 }
 ```
