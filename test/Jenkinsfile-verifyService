@@ -1,0 +1,37 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=verifyservice", "-p DATABASE_SERVICE_NAME=verifyservice")
+                openshift.apply(model)
+
+                def deployment = openshift.selector("dc", "verifyservice")
+                deployment.rollout().status("--watch=true")
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can verify service") {
+        verifyService([
+                serviceName: "verifyservice"
+        ])
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def deployment = openshift.selector("dc", "verifyservice")
+
+                sh "curl -L http://verifyservice:3306"
+
+                //Scale down afterwards to lower quotas
+                deployment.scale("--replicas=0")
+            }
+        }
+    }
+}

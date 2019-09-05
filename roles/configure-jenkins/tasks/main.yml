@@ -17,19 +17,22 @@
     register: createlib_result
     until: createlib_result is not failed
 
-- name: Install sonar
+- name: Install plugins
   uri:
     url: "https://{{ url.stdout }}/pluginManager/installNecessaryPlugins"
     method: POST
     status_code:
     - 200
     - 302
-    body: "<jenkins><install plugin='sonar@2.10' /></jenkins>"
+    body: "<jenkins><install plugin='{{ item }}' /></jenkins>"
     headers:
       Authorization: "Bearer {{ oc_token }}"
       Content-Type: text/xml
     validate_certs: no
     retries: "{{ retries|int }}"
     delay: "{{ delay|int }}"
-    register: sonarinstall_result
-    until: sonarinstall_result is not failed
+    register: plugininstall_result
+    until: plugininstall_result is not failed
+  with_items:
+  - sonar@2.10
+  - openshift-client@1.0.32

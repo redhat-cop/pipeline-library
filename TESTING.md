@@ -63,8 +63,9 @@ oc rollout status dc/jenkins --watch=true
 curl --header "Authorization: Bearer $(oc whoami --show-token)" --data-urlencode "script=$(< test/create-pipeline-library.groovy)" https://$(oc get route jenkins -o jsonpath={.spec.host})/scriptText
 ```
 
-### Install sonar plugin
+### Install plugins
 ```bash
+curl -X POST -d "<jenkins><install plugin='openshift-client@1.0.32' /></jenkins>" --header "Authorization: Bearer $(oc whoami --show-token)" --header "Content-Type: text/xml" https://$(oc get route jenkins -o jsonpath={.spec.host})/pluginManager/installNecessaryPlugins
 curl -X POST -d "<jenkins><install plugin='sonar@2.9' /></jenkins>" --header "Authorization: Bearer $(oc whoami --show-token)" --header "Content-Type: text/xml" https://$(oc get route jenkins -o jsonpath={.spec.host})/pluginManager/installNecessaryPlugins
 ```
 
