@@ -8,6 +8,10 @@ class TagImageInput implements Serializable {
     String toImageName
     String toImageTag
 
+    //Optional - Platform
+    String clusterAPI = ""
+    String clusterToken = ""
+
     TagImageInput init() {
         if(!toImageName?.trim()) toImageName = sourceImageName
         if(!toImageTag?.trim()) toImageTag = sourceImageTag
@@ -24,7 +28,7 @@ def call(TagImageInput input) {
     assert input.sourceImagePath?.trim() : "Param sourceImagePath should be defined."
     assert input.toImagePath?.trim() : "Param toImagePath should be defined."
 
-    openshift.withCluster() {
+    openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.tag("${input.sourceImagePath}/${input.sourceImageName}:${input.sourceImageTag}", 
                       "${input.toImagePath}/${input.toImageName}:${input.toImageTag}")
     }

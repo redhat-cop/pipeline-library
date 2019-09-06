@@ -1,8 +1,12 @@
 #!/usr/bin/env groovy
 
 class ClusterCredentialsInput implements Serializable {
-    String projectName = ""
     String secretName  = ""
+
+    //Optional - Platform
+    String clusterAPI = ""
+    String clusterToken = ""
+    String projectName = ""
 }
 
 def call(Map input) {
@@ -18,7 +22,7 @@ def call(ClusterCredentialsInput input) {
     def encodedApi
     def encodedToken
 
-    openshift.withCluster() {
+    openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
             def secret = openshift.selector("secret/${input.secretName}")
             def secretObject = secret.object()

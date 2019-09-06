@@ -1,8 +1,12 @@
 #!/usr/bin/env groovy
 
 class ConfigMapInput implements Serializable {
-    String projectName = ""
     String configMapName  = ""
+
+    //Optional - Platform
+    String clusterAPI = ""
+    String clusterToken = ""
+    String projectName = ""
 }
 
 def call(Map input) {
@@ -17,7 +21,7 @@ def call(ConfigMapInput input) {
 
     def configMapData
 
-    openshift.withCluster() {
+    openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
             def configMap = openshift.selector("configmap/${input.configMapName}")
             def configMapObject = configMap.object()
