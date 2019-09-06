@@ -54,4 +54,4 @@ oc secrets link --for=mount jenkins local-registry
 find test -type f -name "Jenkinsfile-*" -exec bash -c 'oc start-build $(basename {} | tr 'A-Z' 'a-z')-pipeline' \;
 
 ### Cleanup
-oc delete project pipelinelib-testing pipelinelib-promotion-testing build-s2i-executable
+oc delete project pipelinelib-testing pipelinelib-promotion-testing build-s2i-executable sonarqube
