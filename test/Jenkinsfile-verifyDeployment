@@ -15,8 +15,7 @@ node("maven") {
 
     stage("TEST: Can verify deployment") {
         verifyDeployment([
-                targetApp: "verifydeployment",
-                projectName: "pipelinelib-testing"
+                targetApp: "verifydeployment"
         ])
     }
 

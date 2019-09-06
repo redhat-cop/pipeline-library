@@ -37,18 +37,14 @@ podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image
         }
 
         stage("TEST: Can tag and deploy") {
-            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
-                tagAndDeploy([
-                        registryFQDN               : "${dockerRegistry}",
-                        imageNamespace             : "pipelinelib-testing",
-                        imageName                  : "taganddeploy",
-                        imageVersion               : "latest",
-                        deployDestinationVersionTag: "v2",
-                        deployDestinationProjectName: "pipelinelib-testing",
-                        clusterAPI: "https://kubernetes.default.svc",
-                        clusterToken: "${TOKEN}"
-                ])
-            }
+            tagAndDeploy([
+                    registryFQDN               : "${dockerRegistry}",
+                    imageNamespace             : "pipelinelib-testing",
+                    imageName                  : "taganddeploy",
+                    imageVersion               : "latest",
+                    deployDestinationVersionTag: "v2",
+                    deployDestinationProjectName: "pipelinelib-testing"
+            ])
         }
 
         stage("ASSERT") {

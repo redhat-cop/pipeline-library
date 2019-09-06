@@ -5,12 +5,14 @@ class TagAndDeployInput implements Serializable {
     String imageNamespace               = ''
     String imageVersion                 = ''
     String registryFQDN                 = ''
-    String clusterAPI                   = ''
-    String clusterToken                 = ''
     String deployDestinationProjectName = ''
     String deployDestinationVersionTag  = ''  
     String tagDestinationTLSVerify      = 'false'
     String tagSourceTLSVerify           = 'false'
+
+    //Optional - Platform
+    String clusterAPI                   = ''
+    String clusterToken                 = ''
 }
 
 def call(Map input) {
@@ -22,8 +24,6 @@ def call(TagAndDeployInput input) {
     assert input.imageNamespace?.trim()           : "Param imageNamespace should be defined."
     assert input.imageVersion?.trim()             : "Param imageVersion should be defined."
     assert input.registryFQDN?.trim()             : "Param registryFQDN should be defined."
-    assert input.clusterAPI?.trim()               : "Param clusterAPI should be defined."
-    assert input.clusterToken?.trim()             : "Param clusterToken should be defined."
     assert input.deployDestinationProjectName?.trim()  : "Param deployDestinationProjectName should be defined."
     assert input.deployDestinationVersionTag?.trim()      : "Param deployDestinationVersionTag should be defined."
 

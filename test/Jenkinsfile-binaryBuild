@@ -34,8 +34,7 @@ node("maven") {
         binaryBuild([
                 buildConfigName: "sample-build-binary",
                 buildFromFlag  : "--from-dir",
-                buildFromPath  : "${WORKSPACE}/build/",
-                projectName: "pipelinelib-testing"
+                buildFromPath  : "${WORKSPACE}/build/"
         ])
     }
 

@@ -23,14 +23,9 @@ node("maven") {
     }
 
     stage("TEST: Can rollout to latest version") {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
-            rollout([
-                    deploymentConfigName: "rollout",
-                    projectName         : "pipelinelib-testing",
-                    clusterAPI          : "https://kubernetes.default.svc",
-                    clusterToken        : "${TOKEN}"
-            ])
-        }
+        rollout([
+                deploymentConfigName: "rollout"
+        ])
     }
 
     stage("ASSERT") {
