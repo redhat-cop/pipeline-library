@@ -1,32 +1,48 @@
-# Verify Deployment
+# verifyDeployment
 
-Verifies OpenShift deployment by checking each deployed pods status.
+## Summary
 
-Sample usage:
+Verify a DeploymentConfig has deployed successfully.
 
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+
+### Parameters
+
+The method supports the following parameters:
+```java
+// verifyDeployment.groovy#L4-L12
+
+//Required
+String targetApp
+
+//Optional - Platform
+String clusterUrl = ""
+String clusterAPI = ""
+String clusterToken = ""
+String projectName = ""
+Integer loglevel = 0
 ```
-stage {
-    steps{
-        verifyDeployment(targetApp: "hello-world", projectName: "example-project")
-    }
+
+### Example
+
+```java
+// ../test/Jenkinsfile-verifyDeployment#L16-L20
+
+stage("TEST: Can verify deployment") {
+    verifyDeployment([
+            targetApp: "verifydeployment"
+    ])
 }
 ```
 
-Example with all parameters set:
-```
-stage {
-    steps{
-        verifyDeployment(targetApp: "hello-world", 
-                 projectName: "example-project", 
-                 clusterUrl: "https://master.example.com",
-                 clusterToken: "<Openshift token>")
-    }
-}
-```
+### Local vs Remote cluster support
 
-Include this library by adding this before "pipeline" in your Jenkins:
-```
-library identifier: "pipeline-library@master", retriever: modernSCM(
-  [$class: "GitSCMSource",
-   remote: "https://github.com/redhat-cop/pipeline-library.git"])
-```
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.

@@ -1,36 +1,58 @@
-# Tag Image
+# tagImage
 
-Easiest way to copy images between OpenShift projects is to use imagestreams tags.
-This function will issue this tag from source ImageStream to target ImageStream.
+## Summary
 
-Sample usage:
+(Tag)[https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#tagging-images] an image.
 
-Simplest example that assumes Image tag to be "latest" and destination Image name plus tag to be same as with source:
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+
+### Parameters
+
+The method supports the following parameters:
+```java
+// tagImage.groovy#L4-L17
+
+//Required
+String sourceImagePath =  ""
+String sourceImageName = ""
+String sourceImageTag = "latest"
+String toImagePath
+
+//Optional
+String toImageName = ""
+String toImageTag = ""
+
+//Optional - Platform
+String clusterAPI = ""
+String clusterToken = ""
+Integer loglevel = 0
 ```
-stage {
-    steps{
-        tagImage(sourceImageName: "hello-world", sourceImagePath: "example-project")
-    }
+
+### Example
+
+```java
+// ../test/Jenkinsfile-tagImage#L5-L14
+
+stage("TEST: Can tag image") {
+    tagImage([
+            sourceImagePath: "openshift",
+            sourceImageName: "jenkins",
+            sourceImageTag : "2",
+            toImagePath: "pipelinelib-testing",
+            toImageName    : "tagimage",
+            toImageTag     : "2"
+    ])
 }
 ```
 
-Example with all parameters set:
-```
-stage {
-    steps{
-        tagImage(sourceImageName: "hello-world", 
-                 sourceImagePath: "example-project", 
-                 sourceImageTag: "test-ready", 
-                 toImageName: "hello-testers", 
-                 toImagePath: "test-project",
-                 toImageTag: "test")
-    }
-}
-```
+### Local vs Remote cluster support
 
-Include this library by adding this before "pipeline" in your Jenkins:
-```
-library identifier: "pipeline-library@master", retriever: modernSCM(
-  [$class: "GitSCMSource",
-   remote: "https://github.com/redhat-cop/pipeline-library.git"])
-```
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.

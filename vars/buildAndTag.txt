@@ -1,15 +1,64 @@
 # buildAndTag
-Invokes an image build and tag
 
-## Sample Usage
+## Summary
 
+Trigger a BuildConfig using the [binary build strategy](https://docs.openshift.com/container-platform/3.11/dev_guide/dev_tutorials/binary_builds.html)
+and tag the resulting image.
+
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+- Skopeo
+
+### Parameters
+
+The method supports the following parameters:
+```java
+// buildAndTag.groovy#L4-L22
+
+//Required
+String imageName               = ''
+String imageNamespace          = ''
+String imageVersion            = ''
+String registryFQDN            = ''
+
+//Optional
+String fromFilePath            = ""
+String tagDestinationTLSVerify = "true"
+String tagSourceTLSVerify      = "true"
+String tagAuthFile             = "/var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson"
+String tagDestinationCertDir   = "/run/secrets/kubernetes.io/serviceaccount/"
+String tagSourceCertDir        = "/run/secrets/kubernetes.io/serviceaccount/"
+
+//Optional - Platform
+String clusterAPI              = ""
+String clusterToken            = ""
+String buildProjectName        = ""
+Integer loglevel = 0
 ```
-buildAndTag(
-    imageName        : 'my-service',
-    imageNamespace   : 'my-app',
-    imageVersion     : '1.0',
-    registryName     : 'my-registry.example.com',
-    buildProjectName : 'my-cicd-namespace',
-    fromFilePath     : 'target/my-artifact'
-)
+
+### Example
+
+```java
+// ../test/Jenkinsfile-buildAndTag#L50-L58
+
+stage("TEST: Can build and tag") {
+    buildAndTag([
+            imageName     : "sample-build",
+            fromFilePath  : "${WORKSPACE}/target/",
+            registryFQDN  : "${dockerRegistry}",
+            imageNamespace: "pipelinelib-testing",
+            imageVersion  : "v2"
+    ])
+}
 ```
+
+### Local vs Remote cluster support
+
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.

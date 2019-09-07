@@ -1,37 +1,56 @@
-# SonarQube Static Analysis
+# sonarqubeStaticAnalysis
 
-This function will validate that a build server webhook has been configured in 
-SonarQube, run the sonar:sonar maven goal for the configured pom file, and then 
-wait for the quality gate status to be OK.  The pipeline will be stopped if the
-webhook has not been configured or the quality gate fails. Be advised that the 
+## Summary
+
+This function will:
+- validate that a build server webhook has been configured in SonarQube
+- run the sonar:sonar maven goal for the configured pom file
+- wait for the quality gate status to be OK.
+
+The pipeline will be stopped if the webhook has not been configured or the quality gate fails. Be advised that the
 SonarQube deployment @ https://github.com/redhat-cop/containers-quickstarts/tree/master/sonarqube
 will create this webhook for you.
 
-Sample usage:
+## Usage
 
-Simplest example that assumes that the pom.xml is at the current working directory
-and that webhook has been created with the name 'jenkins':
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+- Maven
+- SonarQube server and Jenkins plugin
+
+### Parameters
+
+The method supports the following parameters:
+```java
+// sonarqubeStaticAnalysis.groovy#L4-L7
+
+//Optional
+String pomFile = "pom.xml"
+String buildServerWebHookName = "jenkins"
+String curlOptions = ""
 ```
-stage {
-    steps{
-        sonarqubeStaticAnalysis()
+
+### Example
+
+```java
+// ../test/Jenkinsfile-sonarqubeStaticAnalysis#L84-L92
+
+stage("TEST: Can run sonarqube static analysis") {
+    sh "git clone https://github.com/redhat-cop/pipeline-library.git"
+
+    dir ("pipeline-library") {
+        sonarqubeStaticAnalysis([
+            curlOptions: "--insecure"
+        ])
     }
 }
 ```
 
-Example with all parameters set:
-```
-stage {
-    steps{
-        sonarqubeStaticAnalysis(pomFile: "pom.xml",
-                                buildServerWebHookName: "jenkins")
-    }
-}
-```
+### Local vs Remote cluster support
 
-Include this library by adding this before "pipeline" in your Jenkins:
-```
-library identifier: "pipeline-library@master", retriever: modernSCM(
-  [$class: "GitSCMSource",
-   remote: "https://github.com/redhat-cop/pipeline-library.git"])
-```
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.

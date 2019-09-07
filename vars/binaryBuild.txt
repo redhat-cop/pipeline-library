@@ -1,30 +1,51 @@
 # binaryBuild
 
-This trigger binary build if pointed to BuildConfig with binary -strategy.
+## Summary
 
-Sample usages:
+Trigger a BuildConfig using the [binary build strategy](https://docs.openshift.com/container-platform/3.11/dev_guide/dev_tutorials/binary_builds.html).
 
-Build from directory
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+
+### Parameters
+
+The method supports the following parameters:
+```java
+// binaryBuild.groovy#L4-L13
+
+//Required
+String buildConfigName = ""
+String buildFromFlag   = "--from-dir"
+String buildFromPath   = ""
+
+//Optional - Platform
+String clusterAPI      = ""
+String clusterToken    = ""
+String projectName     = ""
+Integer loglevel = 0
 ```
-stage {
-    steps{
-        binaryBuild(projectName: "example", buildConfigName: "hello-world-build", buildFromPath: "artifacts")
-    }
+
+### Example
+
+```java
+// ../test/Jenkinsfile-binaryBuild#L33-L39
+
+stage("TEST: Can build using from-file") {
+    binaryBuild([
+            buildConfigName: "sample-build-binary",
+            buildFromFlag  : "--from-dir",
+            buildFromPath  : "${WORKSPACE}/build/"
+    ])
 }
 ```
 
-Build from file
-```
-stage {
-    steps{
-        binaryBuild(projectName: "example", buildConfigName: "hello-world-build", buildFromPath: "artifacts", buildFromFlag: "--from-file")
-    }
-}
-```
+### Local vs Remote cluster support
 
-Include this library by adding this before "pipeline" in your Jenkins:
-```
-library identifier: "pipeline-library@master", retriever: modernSCM(
-  [$class: "GitSCMSource",
-   remote: "https://github.com/redhat-cop/pipeline-library.git"])
-```
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.
