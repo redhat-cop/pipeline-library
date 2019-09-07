@@ -11,6 +11,7 @@ class CopyImageInput implements Serializable{
 
     //Optional - Platform
     String clusterUrl = ""
+    String clusterAPI = ""
     String clusterToken = ""
 
     CopyImageInput init() {
@@ -26,6 +27,12 @@ def call(Map input) {
 }
 
 def call(CopyImageInput input) {
+    if (input.clusterUrl?.trim().length() > 0) {
+        echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
+
+        input.clusterAPI = input.clusterUrl
+    }
+
     openshift.withCluster(input.clusterUrl, input.clusterToken) {
         def localToken = readFile("/var/run/secrets/kubernetes.io/serviceaccount/token").trim()
 
