@@ -1,10 +1,12 @@
 #!/usr/bin/env groovy
 
 class RolloutInput implements Serializable {
+    String deploymentConfigName = ""
+
+    //Optional - Platform
     String clusterAPI           = ""
     String clusterToken         = ""
     String projectName          = ""
-    String deploymentConfigName = ""
 }
 
 def call(Map input) {
@@ -12,9 +14,6 @@ def call(Map input) {
 }
 
 def call(RolloutInput input) {
-    assert input.clusterAPI?.trim()           : "Param clusterAPI should be defined."
-    assert input.clusterToken?.trim()         : "Param clusterToken should be defined."
-    assert input.projectName?.trim()          : "Param projectName should be defined."
     assert input.deploymentConfigName?.trim() : "Param deploymentConfigName should be defined."
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {

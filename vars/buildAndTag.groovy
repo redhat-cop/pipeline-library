@@ -5,12 +5,14 @@ class BuildAndTagInput implements Serializable {
     String imageNamespace          = ''
     String imageVersion            = ''
     String registryFQDN            = ''
-    String clusterAPI              = ''
-    String clusterToken            = ''
-    String buildProjectName        = ''
     String fromFilePath            = ''
     String tagDestinationTLSVerify = 'false'
     String tagSourceTLSVerify      = 'false'
+
+    //Optional - Platform
+    String clusterAPI              = ""
+    String clusterToken            = ""
+    String buildProjectName        = ""
 }
 
 def call(Map input) {
@@ -22,7 +24,6 @@ def call(BuildAndTagInput input) {
     assert input.imageNamespace?.trim()   : "Param imageNamespace should be defined."
     assert input.imageVersion?.trim()     : "Param imageVersion should be defined."
     assert input.registryFQDN?.trim()     : "Param registryFQDNshould be defined."
-    assert input.buildProjectName?.trim() : "Param buildProjectName should be defined."
     assert input.fromFilePath?.trim()     : "Param fromFilePath should be defined."
 
     binaryBuild([

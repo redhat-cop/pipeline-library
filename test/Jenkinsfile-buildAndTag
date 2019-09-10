@@ -53,9 +53,7 @@ podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image
                     fromFilePath  : "${WORKSPACE}/target/",
                     registryFQDN  : "${dockerRegistry}",
                     imageNamespace: "pipelinelib-testing",
-                    imageVersion  : "v2",
-                    buildProjectName: "pipelinelib-testing"
-
+                    imageVersion  : "v2"
             ])
         }
 

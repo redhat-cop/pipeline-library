@@ -28,8 +28,7 @@ node("maven") {
 
     stage("TEST: Can get configmap data") {
         configMapData = configMap([
-                configMapName: "game-config",
-                projectName: "pipelinelib-testing"
+                configMapName: "game-config"
         ])
     }
 

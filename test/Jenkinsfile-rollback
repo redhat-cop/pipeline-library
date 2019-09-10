@@ -29,13 +29,9 @@ node("maven") {
     }
 
     stage("TEST: Can rollback to earlier version") {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
-            rollback([
-                    deploymentConfig: "dc/rollback",
-                    clusterUrl      : "https://kubernetes.default.svc",
-                    clusterToken    : "${TOKEN}"
-            ])
-        }
+        rollback([
+                deploymentConfig: "dc/rollback"
+        ])
     }
 
     stage("ASSERT") {

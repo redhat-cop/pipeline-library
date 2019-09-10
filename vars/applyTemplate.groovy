@@ -1,11 +1,13 @@
 #!/usr/bin/env groovy
 
 class ApplyTemplateInput implements Serializable{
-    String projectName
     String templateFile
     String parameterFile
+
+    //Optional - Platform
     String clusterUrl = ""
     String clusterToken = ""
+    String projectName = ""
 }
 
 def call(Map input) {
@@ -14,7 +16,7 @@ def call(Map input) {
 
 def call(ApplyTemplateInput input) {
     openshift.withCluster(input.clusterUrl, input.clusterToken) {
-        openshift.withProject("${input.projectName}") {
+        openshift.withProject(input.projectName) {
             def models = openshift.process( "--filename=${input.templateFile}", "--param-file=${input.parameterFile}", "--ignore-unknown-parameters")
             echo "Creating this template will instantiate ${models.size()} objects"
             

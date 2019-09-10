@@ -10,6 +10,8 @@ class ApplierInput implements Serializable{
     String applierPlaybook        = 'galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml'
     String playbookAdditionalArgs = ''
     String secretName             = ''
+
+    //Optional - Platform
     String clusterAPI             = ''
     String clusterToken           = ''
 }

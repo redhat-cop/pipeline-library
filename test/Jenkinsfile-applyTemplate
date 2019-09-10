@@ -18,8 +18,7 @@ node("maven") {
     stage("TEST: Can deploy via local file") {
         applyTemplate([
                 templateFile : "cakephp-mysql.json",
-                parameterFile: "params.txt",
-                projectName: "pipelinelib-testing"
+                parameterFile: "params.txt"
         ])
     }
 

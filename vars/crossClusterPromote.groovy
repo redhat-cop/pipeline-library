@@ -8,6 +8,8 @@ class CopyImageInput implements Serializable{
     String destinationImageTag
     String destinationImagePath
     String targetRegistryCredentials = "other-cluster-credentials"
+
+    //Optional - Platform
     String clusterUrl = ""
     String clusterToken = ""
 

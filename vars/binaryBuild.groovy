@@ -1,12 +1,14 @@
 #!/usr/bin/env groovy
 
 class BinaryBuildInput implements Serializable {
-    String clusterAPI      = ""
-    String clusterToken    = ""
-    String projectName     = ""
     String buildConfigName = ""
     String buildFromFlag   = "--from-dir"
     String buildFromPath   = ""
+
+    //Optional - Platform
+    String clusterAPI      = ""
+    String clusterToken    = ""
+    String projectName     = ""
 }
 
 def call(Map input) {
@@ -14,7 +16,6 @@ def call(Map input) {
 }
 
 def call(BinaryBuildInput input) {
-    assert input.projectName?.trim()     : "Param projectName should be defined."
     assert input.buildConfigName?.trim() : "Param buildConfigName should be defined."
     assert input.buildFromFlag?.trim()   : "Param buildFromFlag should be defined."
     assert input.buildFromPath?.trim()   : "Param buildFromPath should be defined."

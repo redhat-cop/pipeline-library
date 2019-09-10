@@ -14,7 +14,6 @@ def call(Map input) {
 }
 
 def call(ClusterCredentialsInput input) {
-    assert input.projectName?.trim() : "Param projectName should be defined."
     assert input.secretName?.trim()  : "Param secretName should be defined."
 
     echo "Get Cluster Credentials: ${input.projectName}/${input.secretName}"
