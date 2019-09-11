@@ -1,0 +1,26 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create build files") {
+        dir("build") {
+            dockerfile = """
+                    FROM scratch
+                    COPY README.md /
+                    """
+
+            writeFile file: "README.md", text: "Test file"
+            writeFile file: "Dockerfile", text: dockerfile
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can build using from-file and fail") {
+        binaryBuild([
+                buildConfigName: "doesnt-exist",
+                buildFromFlag  : "--from-dir",
+                buildFromPath  : "${WORKSPACE}/build/"
+        ])
+    }
+}

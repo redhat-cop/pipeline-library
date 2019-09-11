@@ -1,0 +1,14 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Set logging to verbose") {
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can rollout to latest version and fail") {
+        rollout([
+                deploymentConfigName: "doesnt-exist"
+        ])
+    }
+}
