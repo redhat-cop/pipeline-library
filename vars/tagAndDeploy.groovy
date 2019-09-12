@@ -7,8 +7,11 @@ class TagAndDeployInput implements Serializable {
     String registryFQDN                 = ''
     String deployDestinationProjectName = ''
     String deployDestinationVersionTag  = ''  
-    String tagDestinationTLSVerify      = 'false'
-    String tagSourceTLSVerify           = 'false'
+    String tagDestinationTLSVerify      = 'true'
+    String tagSourceTLSVerify           = 'true'
+    String tagAuthFile                  = "/var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson"
+    String tagDestinationCertDir        = "/run/secrets/kubernetes.io/serviceaccount/"
+    String tagSourceCertDir             = "/run/secrets/kubernetes.io/serviceaccount/"
 
     //Optional - Platform
     String clusterAPI                   = ''
@@ -28,11 +31,15 @@ def call(TagAndDeployInput input) {
     assert input.deployDestinationVersionTag?.trim()      : "Param deployDestinationVersionTag should be defined."
 
     echo "Tag ${input.imageNamespace}/${input.imageName}:${input.imageVersion} as ${input.imageNamespace}/${input.imageName}:${input.deployDestinationVersionTag}"
+
+    def authFileArg = input.tagAuthFile?.trim()?.length() <= 0 ? "" : "--authfile=${input.tagAuthFile}"
+    def srcTlsVerifyArg = input.tagSourceTLSVerify?.trim()?.length() <= 0 ? "" : "--src-tls-verify=${input.tagSourceTLSVerify}"
+    def destTlsVerifyArg = input.tagDestinationTLSVerify?.trim()?.length() <= 0 ? "" : "--dest-tls-verify=${input.tagDestinationTLSVerify}"
+    def destCertDirArg = input.tagDestinationCertDir?.trim()?.length() <= 0 ? "" : "--dest-cert-dir=${input.tagDestinationCertDir}"
+    def srcCertDirArg = input.tagSourceCertDir?.trim()?.length() <= 0 ? "" : "--src-cert-dir=${input.tagSourceCertDir}"
+
     sh """
-        skopeo copy \
-            --authfile /var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson \
-            --src-tls-verify=${input.tagSourceTLSVerify} \
-            --dest-tls-verify=${input.tagDestinationTLSVerify} \
+        skopeo copy $authFileArg $srcTlsVerifyArg $destTlsVerifyArg $destCertDirArg $srcCertDirArg \
             docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:${input.imageVersion} docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:${input.deployDestinationVersionTag}
     """
 
