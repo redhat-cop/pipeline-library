@@ -85,10 +85,7 @@ node("maven") {
         sh "git clone https://github.com/redhat-cop/pipeline-library.git"
 
         dir ("pipeline-library") {
-            sonarqubeStaticAnalysis([
-                    pomFile: "pom.xml",
-                    buildServerWebHookName: "jenkins"
-            ])
+            sonarqubeStaticAnalysis()
         }
     }
 }
