@@ -6,6 +6,7 @@ class ApplyTemplateInput implements Serializable{
 
     //Optional - Platform
     String clusterUrl = ""
+    String clusterAPI = ""
     String clusterToken = ""
     String projectName = ""
 }
@@ -15,6 +16,12 @@ def call(Map input) {
 } 
 
 def call(ApplyTemplateInput input) {
+    if (input.clusterUrl?.trim().length() > 0) {
+        echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
+
+        input.clusterAPI = input.clusterUrl
+    }
+
     openshift.withCluster(input.clusterUrl, input.clusterToken) {
         openshift.withProject(input.projectName) {
             def models = openshift.process( "--filename=${input.templateFile}", "--param-file=${input.parameterFile}", "--ignore-unknown-parameters")

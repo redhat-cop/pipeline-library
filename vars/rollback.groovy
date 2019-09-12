@@ -6,6 +6,7 @@ class Rollback implements Serializable {
 
 	//Optional - Platform
 	String clusterUrl = ""
+	String clusterAPI = ""
 	String clusterToken = ""
 	String projectName = ""
 }
@@ -15,6 +16,12 @@ def call(Map input) {
 }
 
 def call(Rollback input) {
+	if (input.clusterUrl?.trim().length() > 0) {
+		echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
+
+		input.clusterAPI = input.clusterUrl
+	}
+	
 	println "Performing rollback to last successful deployment."
 
 	String rollbackToRevision = ""
