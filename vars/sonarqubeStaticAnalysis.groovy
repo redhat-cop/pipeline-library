@@ -1,11 +1,15 @@
 #!/usr/bin/env groovy
 
 class SonarQubeConfigurationInput implements Serializable {
-
+    //Optional
     String pomFile = "pom.xml"
     String buildServerWebHookName = "jenkins"
     String curlOptions = ""
 
+}
+
+def call() {
+    call(new SonarQubeConfigurationInput())
 }
 
 def call(Map input) {
