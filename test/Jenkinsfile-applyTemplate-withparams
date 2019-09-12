@@ -3,6 +3,13 @@
 
 node("maven") {
     stage("SETUP: Create deployment files") {
+        def params = """
+                    NAME=applytemplate
+                    DATABASE_SERVICE_NAME=applytemplate
+                    """
+
+        writeFile file: "params.txt", text: params
+
         sh "curl -L -o cakephp-mysql.json https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json"
 
         openshift.logLevel(10)
@@ -10,14 +17,15 @@ node("maven") {
 
     stage("TEST: Can deploy via local file") {
         applyTemplate([
-                templateFile : "cakephp-mysql.json"
+                templateFile : "cakephp-mysql.json",
+                parameterFile: "params.txt"
         ])
     }
 
     stage("ASSERT") {
         openshift.withCluster() {
             openshift.withProject() {
-                def deployment = openshift.selector("dc", "cakephp-mysql-example")
+                def deployment = openshift.selector("dc", "applytemplate")
                 assert deployment.exists()
             }
         }
