@@ -1,0 +1,14 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Set logging to verbose") {
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can get configmap data and fail") {
+        configMapData = configMap([
+                configMapName: "doesnt-exist"
+        ])
+    }
+}
