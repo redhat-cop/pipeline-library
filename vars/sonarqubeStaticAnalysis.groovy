@@ -4,6 +4,7 @@ class SonarQubeConfigurationInput implements Serializable {
 
     String pomFile = "pom.xml"
     String buildServerWebHookName = "jenkins"
+    String curlOptions = ""
 
 }
 
@@ -41,7 +42,7 @@ def checkForBuildServerWebHook(SonarQubeConfigurationInput input) {
     withSonarQubeEnv('sonar') {
 
         println "Validating webhook with name ${input.buildServerWebHookName} exists..."
-        def retVal = sh(returnStdout: true, script: "curl -k -u '${SONAR_AUTH_TOKEN}:' ${SONAR_HOST_URL}/api/webhooks/list")
+        def retVal = sh(returnStdout: true, script: "curl ${input.curlOptions} -u '${SONAR_AUTH_TOKEN}:' ${SONAR_HOST_URL}/api/webhooks/list")
         println "Return Value is $retVal"
 
         def tmpfile = "/tmp/sonarwebhooks-${java.util.UUID.randomUUID()}.json"
