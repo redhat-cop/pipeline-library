@@ -30,8 +30,11 @@ def call(ApplyTemplateInput input) {
             def fileNameArg = input.templateFile.toLowerCase().startsWith("http") ? input.templateFile : "--filename=${input.templateFile}"
             def parameterFileArg = input.parameterFile?.trim()?.length() <= 0 ? "" : "--param-file=${input.parameterFile}"
 
+            echo "Attempting to process template '${fileNameArg}' in ${openshift.project()}"
+
             def models = openshift.process(fileNameArg, parameterFileArg, "--ignore-unknown-parameters")
-            echo "Creating this template will instantiate ${models.size()} objects"
+
+            echo "Processed template '${fileNameArg}' will instantiate ${models.size()} objects"
             
             // We need to find DeploymentConfig definitions inside 
             // So iterating trough all the objects loaded from the Template

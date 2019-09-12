@@ -39,16 +39,16 @@ def call(BuildAndTagInput input) {
         buildFromPath   : input.fromFilePath
     ])
 
-    echo "Tag for Build"
-
     def authFileArg = input.tagAuthFile?.trim()?.length() <= 0 ? "" : "--authfile=${input.tagAuthFile}"
     def srcTlsVerifyArg = input.tagSourceTLSVerify?.trim()?.length() <= 0 ? "" : "--src-tls-verify=${input.tagSourceTLSVerify}"
     def destTlsVerifyArg = input.tagDestinationTLSVerify?.trim()?.length() <= 0 ? "" : "--dest-tls-verify=${input.tagDestinationTLSVerify}"
     def destCertDirArg = input.tagDestinationCertDir?.trim()?.length() <= 0 ? "" : "--dest-cert-dir=${input.tagDestinationCertDir}"
     def srcCertDirArg = input.tagSourceCertDir?.trim()?.length() <= 0 ? "" : "--src-cert-dir=${input.tagSourceCertDir}"
-    
-    sh """
-        skopeo copy $authFileArg $srcTlsVerifyArg $destTlsVerifyArg $destCertDirArg $srcCertDirArg \
-            docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:latest docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:${input.imageVersion}
-    """
+
+    def source = "docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:latest"
+    def destination = "docker://${input.registryFQDN}/${input.imageNamespace}/${input.imageName}:${input.imageVersion}"
+
+    echo "Attempting to tag; ${source} -> ${destination}"
+
+    sh "skopeo copy $authFileArg $srcTlsVerifyArg $destTlsVerifyArg $destCertDirArg $srcCertDirArg $source $destination"
 }

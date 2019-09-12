@@ -21,7 +21,7 @@ def call(ConfigMapInput input) {
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
-            echo "Read ConfigMap: ${openshift.project()}/${input.configMapName}"
+            echo "Attemping to retrieve 'configmap/${input.configMapName}' in ${openshift.project()}"
 
             def configMap = openshift.selector("configmap/${input.configMapName}")
             def configMapObject = configMap.object()
