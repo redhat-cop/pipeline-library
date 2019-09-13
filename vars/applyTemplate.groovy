@@ -24,7 +24,7 @@ def call(ApplyTemplateInput input) {
 
     openshift.withCluster(input.clusterUrl, input.clusterToken) {
         openshift.withProject(input.projectName) {
-            def fileNameArg = "--filename=${input.templateFile}"
+            def fileNameArg = input.templateFile.toLowerCase().startsWith("http") ? input.templateFile : "--filename=${input.templateFile}"
             def parameterFileArg = input.parameterFile?.trim()?.length() <= 0 ? "" : "--param-file=${input.parameterFile}"
 
             def models = openshift.process(fileNameArg, parameterFileArg, "--ignore-unknown-parameters")

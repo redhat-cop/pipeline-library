@@ -1,0 +1,31 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        def params = """
+                    NAME=applytemplate-http
+                    DATABASE_SERVICE_NAME=applytemplate-http
+                    """
+
+        writeFile file: "params.txt", text: params
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can deploy via http") {
+        applyTemplate([
+                templateFile : "https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json",
+                parameterFile: "params.txt"
+        ])
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def deployment = openshift.selector("dc", "applytemplate-http")
+                assert deployment.exists()
+            }
+        }
+    }
+}
