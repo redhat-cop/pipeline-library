@@ -40,15 +40,15 @@ def call(ImageMirrorInput input) {
     String sourceApi = input.sourceRegistry.replaceFirst("^(http[s]?://\\.|http[s]?://)", "")
     String destinationApi = input.destinationRegistry.replaceFirst("^(http[s]?://\\.|http[s]?://)", "")
 
-    script {
-        withDockerRegistry([credentialsId: "${input.sourceSecret}", url: "${input.sourceRegistry}"]) {
+    withDockerRegistry([credentialsId: "${input.sourceSecret}", url: "${input.sourceRegistry}"]) {
+        withDockerRegistry([credentialsId: "${input.destinationSecret}", url: "${input.destinationRegistry}"]) {
+            openshift.withCluster() {
+                def source = "${sourceApi}/${input.sourceNamespace}/${input.sourceImage}:${input.sourceImageVersion}"
+                def destination = "${destinationApi}/${input.destinationNamespace}/${input.destinationImage}:${input.destinationImageVersion}"
 
-            withDockerRegistry([credentialsId: "${input.destinationSecret}", url: "${input.destinationRegistry}"]) {
-                sh """
-                    oc image mirror --insecure=${input.insecure} \
-                        ${sourceApi}/${input.sourceNamespace}/${input.sourceImage}:${input.sourceImageVersion} \
-                        ${destinationApi}/${input.destinationNamespace}/${input.destinationImage}:${input.destinationImageVersion}
-                   """
+                echo "Attempting to mirror; ${source} -> ${destination}"
+
+                openshift.raw("image", "mirror", source, destination, "--insecure=${input.insecure}")
             }
         }
     }
