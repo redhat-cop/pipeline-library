@@ -17,9 +17,7 @@ def call(Map input) {
 
 def call(Rollback input) {
 	if (input.clusterUrl?.trim().length() > 0) {
-		echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
-
-		input.clusterAPI = input.clusterUrl
+		error "clusterUrl is deprecated and will be removed in the next release. Please use 'clusterAPI'"
 	}
 	
 	println "Performing rollback to last successful deployment."
@@ -30,7 +28,7 @@ def call(Rollback input) {
 		rollbackToRevision = "--to-revision=" + input.rollbackVersion
 	}
 
-	openshift.withCluster(input.clusterUrl, input.clusterToken) {
+	openshift.withCluster(input.clusterAPI, input.clusterToken) {
 		openshift.withProject(input.projectName) {
 			openshift.selector(input.deploymentConfig).rollout().undo(rollbackToRevision)
 		}

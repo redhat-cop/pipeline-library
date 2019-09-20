@@ -28,12 +28,10 @@ def call(Map input) {
 
 def call(CopyImageInput input) {
     if (input.clusterUrl?.trim().length() > 0) {
-        echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
-
-        input.clusterAPI = input.clusterUrl
+        error "clusterUrl is deprecated and will be removed in the next release. Please use 'clusterAPI'"
     }
 
-    openshift.withCluster(input.clusterUrl, input.clusterToken) {
+    openshift.withCluster(input.clusterAPI, input.clusterToken) {
         def localToken = readFile("/var/run/secrets/kubernetes.io/serviceaccount/token").trim()
 
         def secretData = openshift.selector("secret/${input.targetRegistryCredentials}").object().data
