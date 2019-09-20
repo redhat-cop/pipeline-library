@@ -7,6 +7,12 @@ The below steps can be used to test each pipeline lib method. If you are testing
 - test/create-pipeline-library.groovy - to point to your git repo, instead of https://github.com/redhat-cop/pipeline-library.git
 - test/Jenkinsfile-* - the branch for the Jenkinsfile needs to match the branch of the changes
 
+For convenience, the below commands can automate the above. NOTE: the below presumes the remote url is https based.
+```bash
+sed -i "s|https://github.com/redhat-cop/pipeline-library.git|$(git config --get remote.origin.url)|g" test/create-pipeline-library.groovy
+find test -type f -name "Jenkinsfile*" -exec sed -i "s/pipeline-library@master/pipeline-library@$(git rev-parse --abbrev-ref HEAD)/g" {} \;
+```
+
 ### Create projects
 ```bash
 oc new-project pipelinelib-testing
@@ -32,7 +38,7 @@ find test -type f -name "Jenkinsfile-*" -exec bash -c '\
     -p NAME=$(basename {} | tr 'A-Z' 'a-z') \
     -p PIPELINE_FILENAME=$(basename {}) \
     -p PIPELINE_CONTEXT_DIR=test \
-    -p PIPELINE_SOURCE_REPOSITORY_URL=https://github.com/redhat-cop/pipeline-library.git \
+    -p PIPELINE_SOURCE_REPOSITORY_URL=$(git config --get remote.origin.url) \
     -p PIPELINE_SOURCE_REPOSITORY_REF=$(git rev-parse --abbrev-ref HEAD)' \; | oc apply -f -
 ```
 
