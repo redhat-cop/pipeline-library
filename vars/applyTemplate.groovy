@@ -1,7 +1,10 @@
 #!/usr/bin/env groovy
 
-class ApplyTemplateInput implements Serializable{
+class ApplyTemplateInput implements Serializable {
+    //Required
     String templateFile
+
+    //Optional
     String parameterFile
 
     //Optional - Platform
@@ -16,6 +19,8 @@ def call(Map input) {
 } 
 
 def call(ApplyTemplateInput input) {
+    assert input.templateFile?.trim() : "Param templateFile should be defined."
+
     if (input.clusterUrl?.trim().length() > 0) {
         echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
 

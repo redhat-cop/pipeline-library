@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 class RolloutInput implements Serializable {
+    //Required
     String deploymentConfigName = ""
 
     //Optional - Platform

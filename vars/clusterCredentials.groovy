@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 class ClusterCredentialsInput implements Serializable {
+    //Required
     String secretName  = ""
 
     //Optional - Platform

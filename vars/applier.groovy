@@ -2,12 +2,15 @@
 
 // orginial from https://github.com/redhat-cop/pipeline-library/blob/master/vars/applier.groovy
 
-class ApplierInput implements Serializable{
+class ApplierInput implements Serializable {
+    //Required
     String inventoryPath          = ''
     String requirementsPath       = ''
     String ansibleRootDir         = ''
     String rolesPath              = 'galaxy'
     String applierPlaybook        = 'galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml'
+
+    //Optional
     String playbookAdditionalArgs = ''
     String secretName             = ''
 
@@ -18,15 +21,18 @@ class ApplierInput implements Serializable{
 
 def call(Map input) {
     call(new ApplierInput(input))
-} 
+}
 
 def call(ApplierInput input) {
     assert input.inventoryPath?.trim() : "Param inventoryPath should be defined."
     assert input.requirementsPath?.trim() : "Param requirementsPath should be defined."
+    assert input.ansibleRootDir?.trim() : "Param ansibleRootDir should be defined."
+    assert input.rolesPath?.trim() : "Param rolesPath should be defined."
+    assert input.applierPlaybook?.trim() : "Param applierPlaybook should be defined."
 
     def clusterAPI
     def clusterToken
-    
+
     // if secretName is given then get cluster token from there
     // else use given clusterToken
     // useful to prevent loading the cluster token from secret over and over again

@@ -1,13 +1,16 @@
 #!/usr/bin/env groovy
 
-class CopyImageInput implements Serializable{
+class CopyImageInput implements Serializable {
+    //Required
     String sourceImageName
-    String sourceImagePath
     String sourceImageTag = "latest"
     String destinationImageName
     String destinationImageTag
     String destinationImagePath
     String targetRegistryCredentials = "other-cluster-credentials"
+
+    //Optional
+    String sourceImagePath = ""
 
     //Optional - Platform
     String clusterUrl = ""
@@ -27,6 +30,13 @@ def call(Map input) {
 }
 
 def call(CopyImageInput input) {
+    assert input.targetRegistryCredentials?.trim()  : "Param targetRegistryCredentials should be defined."
+    assert input.sourceImageName?.trim()  : "Param sourceImageName should be defined."
+    assert input.sourceImageTag?.trim()  : "Param sourceImageTag should be defined."
+    assert input.destinationImagePath?.trim()  : "Param destinationImagePath should be defined."
+    assert input.destinationImageName?.trim()  : "Param destinationImageName should be defined."
+    assert input.destinationImageTag?.trim()  : "Param destinationImageTag should be defined."
+
     if (input.clusterUrl?.trim().length() > 0) {
         echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
 
@@ -41,7 +51,7 @@ def call(CopyImageInput input) {
         def token = sh(script:"set +x; echo ${secretData.token} | base64 --decode", returnStdout: true)
         def username = sh(script:"set +x; echo ${secretData.username} | base64 --decode", returnStdout: true)
 
-        openshift.withProject("${input.sourceImagePath}") {
+        openshift.withProject(input.sourceImagePath) {
             def localRegistry = openshift.selector( "is", "${input.sourceImageName}").object().status.dockerImageRepository
             def from = "docker://${localRegistry}:${input.sourceImageTag}"
             def to = "docker://${registry}/${input.destinationImagePath}/${input.destinationImageName}:${input.destinationImageTag}"
