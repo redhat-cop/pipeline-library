@@ -24,7 +24,8 @@ def call(ClusterInput input) {
 
     openshift.withCluster(input.clusterUrl, input.clusterToken) {
         openshift.withProject(input.projectName) {
-            def dcObj = openshift.selector("dc", input.targetApp).object()
+            def deploymentConfig = openshift.selector("dc", input.targetApp)
+            def dcObj = deploymentConfig.object()
             def podSelector = openshift.selector("pod", [deployment: "${input.targetApp}-${dcObj.status.latestVersion}"])
             podSelector.untilEach { pod ->
                 pod.object().status.containerStatuses.every {
@@ -32,13 +33,13 @@ def call(ClusterInput input) {
                         if(it.state.waiting.reason == "CrashLoopBackOff") {
                             echo "Container failing to start. Logs:"
                             pod.logs()
-                            sh "oc deploy ${appName} --cancel"
+                            deploymentConfig.rollout().cancel()
                             error "CrashLoopBackOff"
                         }
                         else if(it.state.waiting.reason == "CreateContainerConfigError") {
                             def message = it.state.waiting.message
                             echo "Container cannot be created: ${message}"
-                            sh "oc deploy ${appName} --cancel"
+                            deploymentConfig.rollout().cancel()
                             error "CreateContainerConfigError : ${message}"
                         }
                     }
