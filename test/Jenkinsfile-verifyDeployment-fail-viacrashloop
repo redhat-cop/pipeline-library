@@ -1,0 +1,24 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=verifydeployment-fail-viacrashloop", "-p DATABASE_SERVICE_NAME=verifydeployment-fail-viacrashloop")
+                openshift.apply(model)
+
+                openshift.patch(openshift.selector("dc", "verifydeployment-fail-viacrashloop").object(), "'{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mysql\",\"env\":null}]}}}}'")
+
+                //HACK: Wait for the deployment to be trigger
+                sh "sleep 5"
+            }
+        }
+    }
+
+    stage("TEST: Can verify deployment and fail with due to crashloopbackoff") {
+        verifyDeployment([
+                targetApp: "verifydeployment-fail-viacrashloop"
+        ])
+    }
+}
