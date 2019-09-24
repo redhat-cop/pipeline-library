@@ -4,6 +4,7 @@ import groovy.json.JsonOutput
 
 // When using the non-declarative pipeline, git env variables need to be set through scm checkout
 class PatchBuildConfigOutputLabelsInput implements Serializable {
+    //Required
     String domainPrefix = "com.redhat"
     String bcName = ""
 
@@ -18,6 +19,7 @@ def call(Map input) {
 }
 
 def call(PatchBuildConfigOutputLabelsInput input) {
+    assert input.domainPrefix?.trim(): "Param domainPrefix should be defined"
     assert input.bcName?.trim(): "Param bcName (build config name) should be defined"
 
     def patch = [

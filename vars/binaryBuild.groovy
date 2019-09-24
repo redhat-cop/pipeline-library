@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 class BinaryBuildInput implements Serializable {
+    //Required
     String buildConfigName = ""
     String buildFromFlag   = "--from-dir"
     String buildFromPath   = ""

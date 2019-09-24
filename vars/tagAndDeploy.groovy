@@ -1,21 +1,24 @@
 #!/usr/bin/env groovy
 
 class TagAndDeployInput implements Serializable {
+    //Required
     String imageName                    = ''
     String imageNamespace               = ''
     String imageVersion                 = ''
     String registryFQDN                 = ''
-    String deployDestinationProjectName = ''
-    String deployDestinationVersionTag  = ''  
-    String tagDestinationTLSVerify      = 'true'
-    String tagSourceTLSVerify           = 'true'
+    String deployDestinationVersionTag  = ''
+
+    //Optional
+    String deployDestinationProjectName = ""
+    String tagDestinationTLSVerify      = "true"
+    String tagSourceTLSVerify           = "true"
     String tagAuthFile                  = "/var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson"
     String tagDestinationCertDir        = "/run/secrets/kubernetes.io/serviceaccount/"
     String tagSourceCertDir             = "/run/secrets/kubernetes.io/serviceaccount/"
 
     //Optional - Platform
-    String clusterAPI                   = ''
-    String clusterToken                 = ''
+    String clusterAPI                   = ""
+    String clusterToken                 = ""
 }
 
 def call(Map input) {
@@ -27,7 +30,6 @@ def call(TagAndDeployInput input) {
     assert input.imageNamespace?.trim()           : "Param imageNamespace should be defined."
     assert input.imageVersion?.trim()             : "Param imageVersion should be defined."
     assert input.registryFQDN?.trim()             : "Param registryFQDN should be defined."
-    assert input.deployDestinationProjectName?.trim()  : "Param deployDestinationProjectName should be defined."
     assert input.deployDestinationVersionTag?.trim()      : "Param deployDestinationVersionTag should be defined."
 
     echo "Tag ${input.imageNamespace}/${input.imageName}:${input.imageVersion} as ${input.imageNamespace}/${input.imageName}:${input.deployDestinationVersionTag}"

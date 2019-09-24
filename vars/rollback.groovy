@@ -1,7 +1,10 @@
 #!/usr/bin/env groovy
 
 class Rollback implements Serializable {
+	//Required
 	String deploymentConfig
+
+	//Optional
 	String rollbackVersion = ""
 
 	//Optional - Platform
@@ -16,6 +19,8 @@ def call(Map input) {
 }
 
 def call(Rollback input) {
+	assert input.deploymentConfig?.trim(): "Param deploymentConfig should be defined"
+
 	if (input.clusterUrl?.trim().length() > 0) {
 		echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
 

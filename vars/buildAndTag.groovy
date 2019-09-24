@@ -1,13 +1,16 @@
 #!/usr/bin/env groovy
 
 class BuildAndTagInput implements Serializable {
+    //Required
     String imageName               = ''
     String imageNamespace          = ''
     String imageVersion            = ''
     String registryFQDN            = ''
-    String fromFilePath            = ''
-    String tagDestinationTLSVerify = 'true'
-    String tagSourceTLSVerify      = 'true'
+
+    //Optional
+    String fromFilePath            = ""
+    String tagDestinationTLSVerify = "true"
+    String tagSourceTLSVerify      = "true"
     String tagAuthFile             = "/var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson"
     String tagDestinationCertDir   = "/run/secrets/kubernetes.io/serviceaccount/"
     String tagSourceCertDir        = "/run/secrets/kubernetes.io/serviceaccount/"
@@ -26,8 +29,7 @@ def call(BuildAndTagInput input) {
     assert input.imageName?.trim()        : "Param imageName should be defined."
     assert input.imageNamespace?.trim()   : "Param imageNamespace should be defined."
     assert input.imageVersion?.trim()     : "Param imageVersion should be defined."
-    assert input.registryFQDN?.trim()     : "Param registryFQDNshould be defined."
-    assert input.fromFilePath?.trim()     : "Param fromFilePath should be defined."
+    assert input.registryFQDN?.trim()     : "Param registryFQDN should be defined."
 
     binaryBuild([
         clusterAPI     : input.clusterAPI,

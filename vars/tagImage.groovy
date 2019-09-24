@@ -1,12 +1,15 @@
 #!/usr/bin/env groovy
 
 class TagImageInput implements Serializable {
+    //Required
     String sourceImagePath =  ""
     String sourceImageName = ""
     String sourceImageTag = "latest"
     String toImagePath
-    String toImageName
-    String toImageTag
+
+    //Optional
+    String toImageName = ""
+    String toImageTag = ""
 
     //Optional - Platform
     String clusterAPI = ""
@@ -26,6 +29,7 @@ def call(Map input) {
 def call(TagImageInput input) {
     assert input.sourceImageName?.trim() : "Param sourceImageName should be defined."
     assert input.sourceImagePath?.trim() : "Param sourceImagePath should be defined."
+    assert input.sourceImageTag?.trim() : "Param sourceImageTag should be defined."
     assert input.toImagePath?.trim() : "Param toImagePath should be defined."
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {

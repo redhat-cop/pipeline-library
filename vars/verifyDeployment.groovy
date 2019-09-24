@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
-class ClusterInput implements Serializable{
+class ClusterInput implements Serializable {
+    //Required
     String targetApp
 
     //Optional - Platform
@@ -16,6 +17,8 @@ def call(Map input) {
 }
 
 def call(ClusterInput input) {
+    assert input.targetApp?.trim() : "Param targetApp should be defined."
+
     if (input.clusterUrl?.trim().length() > 0) {
         echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
 

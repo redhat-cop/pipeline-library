@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 class ConfigMapInput implements Serializable {
+    //Required
     String configMapName  = ""
 
     //Optional - Platform
