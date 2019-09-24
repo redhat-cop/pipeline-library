@@ -20,12 +20,10 @@ def call(ClusterInput input) {
     assert input.targetApp?.trim() : "Param targetApp should be defined."
 
     if (input.clusterUrl?.trim().length() > 0) {
-        echo "WARNING: clusterUrl is deprecated. Please use 'clusterAPI'"
-
-        input.clusterAPI = input.clusterUrl
+        error "clusterUrl is deprecated and will be removed in the next release. Please use 'clusterAPI'"
     }
 
-    openshift.withCluster(input.clusterUrl, input.clusterToken) {
+    openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
             def dcObj = openshift.selector("dc", input.targetApp).object()
             def podSelector = openshift.selector("pod", [deployment: "${input.targetApp}-${dcObj.status.latestVersion}"])
