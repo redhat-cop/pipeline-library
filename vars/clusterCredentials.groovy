@@ -4,6 +4,9 @@ class ClusterCredentialsInput implements Serializable {
     //Required
     String secretName  = ""
 
+    //Optional
+    boolean insecure = false
+
     //Optional - Platform
     String clusterAPI = ""
     String clusterToken = ""
@@ -32,10 +35,12 @@ def call(ClusterCredentialsInput input) {
             encodedToken = secretData.token
         }
     }
-     
+
+    def api = sh(script:"set +x; echo ${encodedApi} | base64 --decode", returnStdout: true)
+    def token = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
+
     //NOTE: the regex here makes it so that the jenkins-client-plugin wont verify the CA
-    def api      = sh(script:"set +x; echo ${encodedApi}      | base64 --decode", returnStdout: true).replaceAll(/https?/, 'insecure')
-    def token    = sh(script:"set +x; echo ${encodedToken}    | base64 --decode", returnStdout: true)
+    api = input.insecure ? api.replaceAll(/https?/, 'insecure') : api
 
     return [api, token]
 }
