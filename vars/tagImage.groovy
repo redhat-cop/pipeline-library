@@ -33,7 +33,11 @@ def call(TagImageInput input) {
     assert input.toImagePath?.trim() : "Param toImagePath should be defined."
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
-        openshift.tag("${input.sourceImagePath}/${input.sourceImageName}:${input.sourceImageTag}", 
-                      "${input.toImagePath}/${input.toImageName}:${input.toImageTag}")
+        def source = "${input.sourceImagePath}/${input.sourceImageName}:${input.sourceImageTag}"
+        def destination = "${input.toImagePath}/${input.toImageName}:${input.toImageTag}"
+
+        echo "Attempting to tag; ${source} -> ${destination}"
+
+        openshift.tag(source,destination)
     }
 }

@@ -17,13 +17,13 @@ def call(Map input) {
 def call(ClusterCredentialsInput input) {
     assert input.secretName?.trim()  : "Param secretName should be defined."
 
-    echo "Get Cluster Credentials: ${input.projectName}/${input.secretName}"
-
     def encodedApi
     def encodedToken
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
+            echo "Attemping to retrieve ClusterCredentials 'secret/${input.secretName}' in ${openshift.project()}"
+
             def secret = openshift.selector("secret/${input.secretName}")
             def secretObject = secret.object()
             def secretData = secretObject.data

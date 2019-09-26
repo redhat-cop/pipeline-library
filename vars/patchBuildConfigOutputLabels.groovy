@@ -38,6 +38,8 @@ def call(PatchBuildConfigOutputLabelsInput input) {
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
+            echo "Attemping to patch 'buildconfig/${input.bcName}' in ${openshift.project()}"
+
             def buildConfig = openshift.selector("bc", input.bcName)
             if (buildConfig.exists()) {
                 openshift.patch(buildConfig.object(), "'" + JsonOutput.toJson(patch) + "'")

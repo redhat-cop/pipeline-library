@@ -24,20 +24,15 @@ def call(Rollback input) {
 	if (input.clusterUrl?.trim().length() > 0) {
 		error "clusterUrl is deprecated and will be removed in the next release. Please use 'clusterAPI'"
 	}
-	
-	println "Performing rollback to last successful deployment."
-
-	String rollbackToRevision = ""
-	if(input.rollbackVersion.length() > 0) {
-		println "Setting revision to rollback to"
-		rollbackToRevision = "--to-revision=" + input.rollbackVersion
-	}
 
 	openshift.withCluster(input.clusterAPI, input.clusterToken) {
 		openshift.withProject(input.projectName) {
-			openshift.selector(input.deploymentConfig).rollout().undo(rollbackToRevision)
+			def cmd = input.rollbackVersion?.trim().length() <= 0 ? "" : "--to-revision=${input.rollbackVersion}"
+
+			echo "Attempting to rollback '${input.deploymentConfig}' in ${openshift.project()} ${cmd}"
+
+			def deployment = openshift.selector(input.deploymentConfig)
+			deployment.rollout().undo(rollbackToRevision)
 		}
 	}
-
-	println "Finished rollback."
 }
