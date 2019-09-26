@@ -23,7 +23,8 @@ def call(BinaryBuildInput input) {
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
-            echo "Start & Follow Build"
+            echo "Attemping to start and follow 'buildconfig/${input.buildConfigName}' in ${openshift.project()}"
+
             def buildConfig = openshift.selector('bc', input.buildConfigName)
             def build       = buildConfig.startBuild("${input.buildFromFlag}=${input.buildFromPath}", '--wait')
             build.logs('-f')

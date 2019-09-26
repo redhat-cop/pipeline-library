@@ -19,15 +19,16 @@ def call(RolloutInput input) {
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
-            echo "Get the Rollout Manager: ${input.deploymentConfigName}"
+            echo "Attemping to rollout latest 'deploymentconfig/${input.deploymentConfigName}' in ${openshift.project()}"
+
             def deploymentConfig = openshift.selector('dc', input.deploymentConfigName)
             def rolloutManager   = deploymentConfig.rollout()
 
-            echo "Deploy: ${input.deploymentConfigName}"
             rolloutManager.latest()
-    
-            echo "Wait for Deployment: ${input.deploymentConfigName}"
-            rolloutManager.status("-w")
+
+            echo "Waiting for rollout of 'deploymentconfig/${input.deploymentConfigName}' in ${openshift.project()} to complete..."
+
+            rolloutManager.status("--wait")
         }
     }
 }
