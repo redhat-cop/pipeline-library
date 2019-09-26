@@ -1,0 +1,34 @@
+#!groovy
+@Library(["pipeline-library@rollout-rollback-resource"]) _
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                openshift.apply("-f", "https://raw.githubusercontent.com/kubernetes/examples/master/guestbook/all-in-one/guestbook-all-in-one.yaml")
+
+                openshift.patch(openshift.selector("deployment", "redis-master").object(), "'{\"spec\":{\"replicas\":0}}'")
+                openshift.patch(openshift.selector("deployment", "redis-slave").object(), "'{\"spec\":{\"replicas\":1}}'")
+                openshift.patch(openshift.selector("deployment", "frontend").object(), "'{\"spec\":{\"replicas\":0}}'")
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can rollout a k8s deployment") {
+        rollout([
+                resourceKindAndName: "deployment/redis-slave",
+                latest: false
+        ])
+    }
+
+    stage("ASSERT") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def deployment = openshift.selector("deployment", "redis-slave")
+                assert deployment.object().status.availableReplicas == 1
+            }
+        }
+    }
+}

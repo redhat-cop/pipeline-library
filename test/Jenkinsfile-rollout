@@ -24,7 +24,7 @@ node("maven") {
 
     stage("TEST: Can rollout to latest version") {
         rollout([
-                deploymentConfigName: "rollout"
+                resourceKindAndName: "dc/rollout"
         ])
     }
 

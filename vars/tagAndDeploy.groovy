@@ -50,7 +50,7 @@ def call(TagAndDeployInput input) {
         clusterAPI     : input.clusterAPI,
         clusterToken   : input.clusterToken,
         projectName    : input.deployDestinationProjectName,
-        deploymentConfigName: input.imageName,
+        resourceKindAndName: "deploymentconfig/${input.imageName}",
         loglevel: input.loglevel
     )
 }

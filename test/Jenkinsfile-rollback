@@ -30,7 +30,7 @@ node("maven") {
 
     stage("TEST: Can rollback to earlier version") {
         rollback([
-                deploymentConfig: "dc/rollback"
+                resourceKindAndName: "dc/rollback"
         ])
     }
 
