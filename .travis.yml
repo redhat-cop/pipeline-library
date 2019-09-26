@@ -7,10 +7,6 @@ install:
   - mvn -N io.takari:maven:wrapper -Dmaven=3.6.0
   - java -version && javac -version && ./mvnw -version -B
 
-before_script:
-  # Check each method has docs and tests, if missing, fail
-  - bash .travis/check-missing.sh
-
 script:
   - ./mvnw clean install -B
 
