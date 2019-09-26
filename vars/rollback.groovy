@@ -32,7 +32,7 @@ def call(Rollback input) {
 			echo "Attempting to rollback '${input.deploymentConfig}' in ${openshift.project()} ${cmd}"
 
 			def deployment = openshift.selector(input.deploymentConfig)
-			deployment.rollout().undo(rollbackToRevision)
+			deployment.rollout().undo(cmd)
 		}
 	}
 }
