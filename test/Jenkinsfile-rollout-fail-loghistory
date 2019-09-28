@@ -1,0 +1,25 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=rollout-fail-loghistory", "-p DATABASE_SERVICE_NAME=rollout-fail-loghistory")
+                openshift.apply(model)
+
+                openshift.patch(openshift.selector("dc", "rollout-fail-loghistory").object(), "'{\"spec\":{\"strategy\":{\"recreateParams\":{\"timeoutSeconds\":60}},\"template\":{\"spec\":{\"containers\":[{\"name\":\"mysql\",\"env\":null}]}}}}'")
+                openshift.selector("dc", "rollout-fail-loghistory").rollout().cancel()
+
+                //HACK: Wait for the deployment to stop
+                sh "sleep 5"
+            }
+        }
+    }
+
+    stage("TEST: Can rollout to latest version and fail with history printed") {
+        rollout([
+                deploymentConfigName: "rollout-fail-loghistory"
+        ])
+    }
+}
