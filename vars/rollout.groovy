@@ -8,6 +8,7 @@ class RolloutInput implements Serializable {
     String clusterAPI           = ""
     String clusterToken         = ""
     String projectName          = ""
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -16,6 +17,8 @@ def call(Map input) {
 
 def call(RolloutInput input) {
     assert input.deploymentConfigName?.trim() : "Param deploymentConfigName should be defined."
+
+    openshift.loglevel(input.loglevel)
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {

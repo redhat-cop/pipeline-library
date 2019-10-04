@@ -10,6 +10,7 @@ class BinaryBuildInput implements Serializable {
     String clusterAPI      = ""
     String clusterToken    = ""
     String projectName     = ""
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -20,6 +21,8 @@ def call(BinaryBuildInput input) {
     assert input.buildConfigName?.trim() : "Param buildConfigName should be defined."
     assert input.buildFromFlag?.trim()   : "Param buildFromFlag should be defined."
     assert input.buildFromPath?.trim()   : "Param buildFromPath should be defined."
+
+    openshift.loglevel(input.loglevel)
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {

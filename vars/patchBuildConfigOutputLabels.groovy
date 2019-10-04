@@ -12,6 +12,7 @@ class PatchBuildConfigOutputLabelsInput implements Serializable {
     String clusterAPI = ""
     String clusterToken = ""
     String projectName = ""
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -21,6 +22,8 @@ def call(Map input) {
 def call(PatchBuildConfigOutputLabelsInput input) {
     assert input.domainPrefix?.trim(): "Param domainPrefix should be defined"
     assert input.bcName?.trim(): "Param bcName (build config name) should be defined"
+
+    openshift.loglevel(input.loglevel)
 
     def patch = [
             spec: [

@@ -17,6 +17,7 @@ class ApplierInput implements Serializable {
     //Optional - Platform
     String clusterAPI             = ''
     String clusterToken           = ''
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -29,6 +30,8 @@ def call(ApplierInput input) {
     assert input.ansibleRootDir?.trim() : "Param ansibleRootDir should be defined."
     assert input.rolesPath?.trim() : "Param rolesPath should be defined."
     assert input.applierPlaybook?.trim() : "Param applierPlaybook should be defined."
+
+    openshift.loglevel(input.loglevel)
 
     def clusterAPI
     def clusterToken
