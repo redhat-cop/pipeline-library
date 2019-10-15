@@ -14,6 +14,9 @@ class ImageMirrorInput implements Serializable {
     String sourceImageVersion = "latest"
     String destinationImageVersion = "latest"
 
+    //Optional - Platform
+    Integer loglevel = 0
+
     ImageMirrorInput init() {
         if(!destinationImage?.trim()) destinationImage = sourceImage
         if(!destinationNamespace?.trim()) destinationNamespace = sourceNamespace
@@ -36,6 +39,8 @@ def call(ImageMirrorInput input) {
     assert input.destinationImage?.trim(): "Param destinationImage should be defined."
     assert input.destinationImageVersion?.trim(): "Param destinationImageVersion should be defined."
     assert input.insecure?.trim(): "Param insecure should be defined."
+
+    openshift.loglevel(input.loglevel)
 
     String sourceApi = input.sourceRegistry.replaceFirst("^(http[s]?://\\.|http[s]?://)", "")
     String destinationApi = input.destinationRegistry.replaceFirst("^(http[s]?://\\.|http[s]?://)", "")

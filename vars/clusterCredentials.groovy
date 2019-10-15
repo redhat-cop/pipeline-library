@@ -11,6 +11,7 @@ class ClusterCredentialsInput implements Serializable {
     String clusterAPI = ""
     String clusterToken = ""
     String projectName = ""
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -19,6 +20,8 @@ def call(Map input) {
 
 def call(ClusterCredentialsInput input) {
     assert input.secretName?.trim()  : "Param secretName should be defined."
+
+    openshift.loglevel(input.loglevel)
 
     def encodedApi
     def encodedToken

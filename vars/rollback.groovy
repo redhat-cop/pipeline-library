@@ -12,6 +12,7 @@ class Rollback implements Serializable {
 	String clusterAPI = ""
 	String clusterToken = ""
 	String projectName = ""
+	Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -20,6 +21,8 @@ def call(Map input) {
 
 def call(Rollback input) {
 	assert input.deploymentConfig?.trim(): "Param deploymentConfig should be defined"
+
+	openshift.loglevel(input.loglevel)
 
 	if (input.clusterUrl?.trim().length() > 0) {
 		error "clusterUrl is deprecated and will be removed in the next release. Please use 'clusterAPI'"

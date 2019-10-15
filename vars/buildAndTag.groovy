@@ -19,6 +19,7 @@ class BuildAndTagInput implements Serializable {
     String clusterAPI              = ""
     String clusterToken            = ""
     String buildProjectName        = ""
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -36,7 +37,8 @@ def call(BuildAndTagInput input) {
         clusterToken   : input.clusterToken,
         projectName    : input.buildProjectName,
         buildConfigName: input.imageName,
-        buildFromPath   : input.fromFilePath
+        buildFromPath   : input.fromFilePath,
+        loglevel: input.loglevel
     ])
 
     def authFileArg = input.tagAuthFile?.trim()?.length() <= 0 ? "" : "--authfile=${input.tagAuthFile}"

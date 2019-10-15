@@ -19,6 +19,7 @@ class TagAndDeployInput implements Serializable {
     //Optional - Platform
     String clusterAPI                   = ""
     String clusterToken                 = ""
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -49,6 +50,7 @@ def call(TagAndDeployInput input) {
         clusterAPI     : input.clusterAPI,
         clusterToken   : input.clusterToken,
         projectName    : input.deployDestinationProjectName,
-        deploymentConfigName: input.imageName
+        deploymentConfigName: input.imageName,
+        loglevel: input.loglevel
     )
 }

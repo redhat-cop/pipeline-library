@@ -8,6 +8,7 @@ class ConfigMapInput implements Serializable {
     String clusterAPI = ""
     String clusterToken = ""
     String projectName = ""
+    Integer loglevel = 0
 }
 
 def call(Map input) {
@@ -16,6 +17,8 @@ def call(Map input) {
 
 def call(ConfigMapInput input) {
     assert input.configMapName?.trim()  : "Param configMapName should be defined."
+
+    openshift.loglevel(input.loglevel)
 
     def configMapData
 

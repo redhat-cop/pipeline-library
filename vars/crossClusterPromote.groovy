@@ -16,6 +16,7 @@ class CopyImageInput implements Serializable {
     String clusterUrl = ""
     String clusterAPI = ""
     String clusterToken = ""
+    Integer loglevel = 0
 
     CopyImageInput init() {
         if(!destinationImageName?.trim()) destinationImageName = sourceImageName
@@ -36,6 +37,8 @@ def call(CopyImageInput input) {
     assert input.destinationImagePath?.trim()  : "Param destinationImagePath should be defined."
     assert input.destinationImageName?.trim()  : "Param destinationImageName should be defined."
     assert input.destinationImageTag?.trim()  : "Param destinationImageTag should be defined."
+
+    openshift.loglevel(input.loglevel)
 
     if (input.clusterUrl?.trim().length() > 0) {
         error "clusterUrl is deprecated and will be removed in the next release. Please use 'clusterAPI'"
