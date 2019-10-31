@@ -31,7 +31,15 @@ def call(RolloutInput input) {
 
             echo "Waiting for rollout of 'deploymentconfig/${input.deploymentConfigName}' in ${openshift.project()} to complete..."
 
-            rolloutManager.status("--wait")
+            try {
+                rolloutManager.status("--watch=true")
+            } catch (ex) {
+                //Something went wrong, so lets print out some helpful information
+                rolloutManager.history()
+                deploymentConfig.describe()
+
+                throw ex
+            }
         }
     }
 }
