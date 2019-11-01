@@ -1,0 +1,35 @@
+---
+
+- name: "Lookup route url for jenkins"
+  shell: "oc get route jenkins -n {{ namespace }} -o jsonpath='{ .spec.host }'"
+  register: url
+
+- name: Create pipeline library
+  uri:
+    url: "https://{{ url.stdout }}/scriptText"
+    method: POST
+    body: "{{ 'script=' ~  lookup('file', '{{ inventory_dir }}/../test/create-pipeline-library.groovy') | urlencode }}"
+    headers:
+      Authorization: "Bearer {{ oc_token }}"
+    validate_certs: no
+    retries: "{{ retries|int }}"
+    delay: "{{ delay|int }}"
+    register: createlib_result
+    until: createlib_result is not failed
+
+- name: Install sonar
+  uri:
+    url: "https://{{ url.stdout }}/pluginManager/installNecessaryPlugins"
+    method: POST
+    status_code:
+    - 200
+    - 302
+    body: "<jenkins><install plugin='sonar@2.9' /></jenkins>"
+    headers:
+      Authorization: "Bearer {{ oc_token }}"
+      Content-Type: text/xml
+    validate_certs: no
+    retries: "{{ retries|int }}"
+    delay: "{{ delay|int }}"
+    register: sonarinstall_result
+    until: sonarinstall_result is not failed

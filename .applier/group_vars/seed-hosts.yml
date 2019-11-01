@@ -1,0 +1,135 @@
+---
+namespace: pipelinelib-testing
+repository_url: https://github.com/redhat-cop/pipeline-library.git
+repo_ref: master
+templates_repo_ref: v1.4.13
+
+secretdata_auth: "openshift1:{{ oc_token }}"
+secretdata:
+  dockercfg_json: '{"auths": { "{{ internal_registry_url.split("/")[0] }}": {"username": "openshift1", "password": "{{ oc_token }}", "auth": "{{ secretdata_auth | b64encode }}", "email": "unused"}}}'
+
+secrets:
+  pipelinelib-testing:
+    local-registry-generic:
+      username: "{{ 'openshift1' }}"
+      token: "{{ oc_token }}"
+      registry: "{{ internal_registry_url.split('/')[0] }}"
+    my-token:
+      username: "{{ 'openshift1' }}"
+      password: "{{ oc_token }}"
+
+jenkins:
+  deploy:
+    MEMORY_REQUEST: 2Gi
+    MEMORY_LIMIT: 3Gi
+    CPU_REQUEST: 2
+    CPU_LIMIT: 3
+  imagestreams:
+    ansible:
+      IMAGE_STREAM_ROLE: jenkins-slave
+      IMAGE_STREAM_NAME: jenkins-slave-ansible
+      IMAGE_STREAM_TAG_FROM_KIND: DockerImage
+      IMAGE_STREAM_TAG_FROM_NAME: quay.io/redhat-cop/jenkins-slave-ansible:v1.15
+      IMAGE_STREAM_NAMESPACE: "{{ namespace }}"
+    imagemgmt:
+      IMAGE_STREAM_ROLE: jenkins-slave
+      IMAGE_STREAM_NAME: jenkins-slave-image-mgmt
+      IMAGE_STREAM_TAG_FROM_KIND: DockerImage
+      IMAGE_STREAM_TAG_FROM_NAME: siamaksade/jenkins-slave-skopeo-centos7
+      IMAGE_STREAM_NAMESPACE: "{{ namespace }}"
+  secrets:
+    localregistrydockercfg:
+      NAME: local-registry
+      DOCKER_CONFIG: "{{ secretdata.dockercfg_json | to_json | b64encode }}"
+  tests:
+    files: "{{ lookup('fileglob', '{{ inventory_dir }}/../test/Jenkinsfile-*', wantlist=true) }}"
+
+openshift_cluster_content:
+- galaxy_requirements:
+  - "{{ inventory_dir }}/../galaxy-requirements.yml"
+- object: Environment Setup
+  content:
+  - name: Create Projects
+    template: "https://raw.githubusercontent.com/redhat-cop/openshift-templates/{{ templates_repo_ref }}/project-requests/create-project.yml"
+    action: create
+    params_from_vars:
+      NAMESPACE: "{{ namespace }}"
+      NAMESPACE_DESCRIPTION: "{{ namespace }}"
+      NAMESPACE_DISPLAY_NAME: "{{ namespace }}"
+    tags:
+    - project
+- object: jenkins-imagestreams
+  content:
+  - name: jenkins-slave-ansible
+    template: "https://raw.githubusercontent.com/redhat-cop/openshift-templates/{{ templates_repo_ref }}/imagestreams/imagestream-generic.yml"
+    params_from_vars: "{{ jenkins.imagestreams.ansible }}"
+    namespace: "{{ namespace }}"
+    tags:
+    - jenkins-imagestreams
+  - name: jenkins-slave-image-mgmt
+    template: "https://raw.githubusercontent.com/redhat-cop/openshift-templates/{{ templates_repo_ref }}/imagestreams/imagestream-generic.yml"
+    params_from_vars: "{{ jenkins.imagestreams.imagemgmt }}"
+    namespace: "{{ namespace }}"
+    tags:
+    - jenkins-imagestreams
+- object: jenkins-secrets
+  content:
+  - name: local-registry-dockercfg
+    template: "https://raw.githubusercontent.com/redhat-cop/openshift-templates/{{ templates_repo_ref }}/secrets/secret-docker-cfg.yml"
+    params_from_vars: "{{ jenkins.secrets.localregistrydockercfg }}"
+    namespace: "{{ namespace }}"
+    tags:
+    - jenkins-secrets
+  - name: generic
+    file: "https://raw.githubusercontent.com/redhat-cop/openshift-templates/{{ templates_repo_ref }}/secrets/dynamic-opaque-jinja.j2"
+    namespace: "{{ namespace }}"
+    post_steps:
+    - role: casl-ansible/roles/openshift-labels
+      vars:
+        label: "credential.sync.jenkins.openshift.io=true"
+        target_object: "secret"
+        target_name: "my-token"
+        target_namespace: "{{ namespace }}"
+    tags:
+    - jenkins-secrets
+- object: jenkins
+  content:
+  - name: jenkins
+    template: "https://raw.githubusercontent.com/redhat-cop/openshift-templates/{{ templates_repo_ref }}/jenkins/jenkins-ephemeral-template.yml"
+    params_from_vars: "{{ jenkins.deploy }}"
+    namespace: "{{ namespace }}"
+    pre_steps:
+    - role: pipeline-library/roles/process-tests
+    post_steps:
+    - role: casl-ansible/roles/openshift-replicas-ready
+      vars:
+        type: deploymentconfig
+        resource: jenkins
+    - role: casl-ansible/roles/openshift-route-status
+      vars:
+        route: jenkins
+        protocol: https
+        status: 200
+        retries: 10
+        delay: 30
+        validate_certificates: no
+        headers:
+          Authorization: "Bearer {{ oc_token }}"
+    - role: pipeline-library/roles/configure-jenkins
+    - role: pipeline-library/roles/link-secret
+      vars:
+        sa_name: "jenkins"
+        secret_name: "local-registry"
+    - role: pipeline-library/roles/link-secret
+      vars:
+        sa_name: "jenkins"
+        secret_name: "local-registry-generic"
+    tags:
+    - jenkins
+- object: test-pipelines
+  content:
+  - name: Deploy test pipelines
+    file: "{{ inventory_dir }}/../.openshift/templates/build-pipelines.j2"
+    namespace: "{{ namespace }}"
+    tags:
+    - test-pipelines

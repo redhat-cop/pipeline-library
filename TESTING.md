@@ -1,6 +1,15 @@
 # Testing
 ## Automated
-Currently, there are no automated tests. The plan would be to automate the manual steps via travis.
+We currently use openshift-applier for deployment and test as per:
+
+```bash
+./_test/setup.sh applier && ./_test/setup.sh test
+```
+
+The scripts also support passing in the project, git repo and git branch as per:
+```bash
+./_test/setup.sh applier pipelinelib-testing garethahealy/pipeline-library auto-testing && ./_test/setup.sh test
+```
 
 ## Manual
 The below steps can be used to test each pipeline lib method. If you are testing a PR or your local branch, you need to change the following:
