@@ -9,7 +9,6 @@ class ClusterInput implements Serializable {
     String clusterAPI = ""
     String clusterToken = ""
     String projectName = ""
-    int timeoutMinutes = 11
     Integer loglevel = 0
 }
 
