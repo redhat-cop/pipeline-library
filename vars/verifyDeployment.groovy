@@ -39,10 +39,10 @@ def call(ClusterInput input) {
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
             echo "Attempting to verify 'deploymentconfig/${input.targetApp}' in ${openshift.project()}"
-            def dcObj = openshift.selector("dc", input.targetApp)
+            def deploymentConfig = openshift.selector("dc", input.targetApp)
             try {
                 timeout(time: input.timeoutMinutes, unit: 'MINUTES') {
-                   dcObj.rollout().status()
+                   deploymentConfig.rollout().status()
                 }
             }
             catch (e) {
