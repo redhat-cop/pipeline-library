@@ -9,7 +9,6 @@ class ClusterInput implements Serializable {
     String clusterAPI = ""
     String clusterToken = ""
     String projectName = ""
-    int timeoutMinutes = 11
     Integer loglevel = 0
 }
 
@@ -40,13 +39,14 @@ def call(ClusterInput input) {
         openshift.withProject(input.projectName) {
             echo "Attempting to verify 'deploymentconfig/${input.targetApp}' in ${openshift.project()}"
             def deploymentConfig = openshift.selector("dc", input.targetApp)
+            def rolloutManager   = deploymentConfig.rollout()
             try {
-                timeout(time: input.timeoutMinutes, unit: 'MINUTES') {
-                   deploymentConfig.rollout().status()
-                }
+                rolloutManager.status("--watch=true")
             }
             catch (e) {
                 echo "Error verifying deployment: ${e}"
+                rolloutManager.history()
+                deploymentConfig.describe()
                 throw e
             }
         }
