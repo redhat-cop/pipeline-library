@@ -9,6 +9,7 @@ class ClusterInput implements Serializable {
     String clusterAPI = ""
     String clusterToken = ""
     String projectName = ""
+    int timeoutMinutes = 11
     Integer loglevel = 0
 }
 
@@ -26,6 +27,7 @@ def call(ClusterInput input) {
         error "clusterUrl is deprecated and will be removed in the next release. Please use 'clusterAPI'"
     }
 
+<<<<<<< HEAD
     rollout([
         clusterAPI         : input.clusterAPI,
         clusterToken       : input.clusterToken,
@@ -33,4 +35,21 @@ def call(ClusterInput input) {
         resourceKindAndName: "dc/${input.targetApp}",
         latest             : false
     ])
+=======
+    openshift.withCluster(input.clusterAPI, input.clusterToken) {
+        openshift.withProject(input.projectName) {
+            echo "Attempting to verify 'deploymentconfig/${input.targetApp}' in ${openshift.project()}"
+            def dcObj = openshift.selector("dc", input.targetApp)
+            try {
+                timeout(time: input.timeoutMinutes, unit: 'MINUTES') {
+                   dcObj.rollout().status()
+                }
+            }
+            catch (e) {
+                echo "Error verifying deployment: ${e}"
+                throw e
+            }
+        }
+    }
+>>>>>>> Update verify to look at dc rollout status
 }
