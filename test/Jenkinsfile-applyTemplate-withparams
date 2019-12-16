@@ -27,6 +27,9 @@ node("maven") {
             openshift.withProject() {
                 def deployment = openshift.selector("dc", "applytemplate")
                 assert deployment.exists()
+
+                //Scale down afterwards to lower quotas
+                deployment.scale("--replicas=0")
             }
         }
     }

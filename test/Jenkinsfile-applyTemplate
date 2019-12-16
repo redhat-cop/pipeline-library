@@ -20,6 +20,9 @@ node("maven") {
             openshift.withProject() {
                 def deployment = openshift.selector("dc", "cakephp-mysql-example")
                 assert deployment.exists()
+
+                //Scale down afterwards to lower quotas
+                deployment.scale("--replicas=0")
             }
         }
     }
