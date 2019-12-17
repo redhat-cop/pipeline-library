@@ -54,6 +54,10 @@ podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image
                     imageStream.untilEach(1) {
                         return it.object().status?.tags?.size() == 2
                     }
+
+                    //Scale down afterwards to lower quotas
+                    def deployment = openshift.selector("dc", "taganddeploy")
+                    deployment.scale("--replicas=0")
                 }
             }
         }

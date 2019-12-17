@@ -24,6 +24,9 @@ node("maven") {
             openshift.withProject() {
                 def deployment = openshift.selector("dc", "verifydeployment")
                 deployment.rollout().status("--watch=true")
+
+                //Scale down afterwards to lower quotas
+                deployment.scale("--replicas=0")
             }
         }
     }

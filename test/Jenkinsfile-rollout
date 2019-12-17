@@ -38,6 +38,9 @@ node("maven") {
 
                 def rc = openshift.selector("rc", "rollout-${nextRcNumber}")
                 assert rc.exists()
+
+                //Scale down afterwards to lower quotas
+                deployment.scale("--replicas=0")
             }
         }
     }

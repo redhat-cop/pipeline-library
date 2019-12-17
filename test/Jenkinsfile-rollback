@@ -51,6 +51,9 @@ node("maven") {
                 def third = openshift.selector("rc", "rollback-${firstDeploymentVersion + 2}")
                 assert third.exists()
                 assert third.object().spec.template.metadata.labels.version == null
+
+                //Scale down afterwards to lower quotas
+                deployment.scale("--replicas=0")
             }
         }
     }
