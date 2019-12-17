@@ -4,6 +4,12 @@ export TOP_PID=$$
 NAMESPACE="${2:-pipelinelib-testing}"
 CI_REPO_SLUG="${3:-redhat-cop/pipeline-library}"
 CI_BRANCH="${4:-master}"
+CLONE_DIR="/tmp/${CI_REPO_SLUG}/${CI_BRANCH}"
+
+clone() {
+  rm -rf ${CLONE_DIR}
+  git clone --single-branch --branch ${CI_BRANCH} "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
+}
 
 applier() {
   echo "${CI_BRANCH}"
@@ -13,6 +19,7 @@ applier() {
     -e namespace=${NAMESPACE} \
     -e repo_ref=${CI_BRANCH} \
     -e repository_url=https://github.com/${CI_REPO_SLUG}.git \
+    -e clone_dir=${CLONE_DIR} \
     -e oc_token="$(oc whoami --show-token)" \
     -e internal_registry_url="$(oc get is jenkins -n openshift -o jsonpath={.status.dockerImageRepository})"
 }
@@ -42,8 +49,8 @@ test() {
     sleep 1
   done
 
-  download_jenkins_logs_for_failed "$(ls --ignore=*fail* test/ | grep "Jenkinsfile" | tr 'A-Z' 'a-z' | xargs)" "Complete"
-  download_jenkins_logs_for_failed "$(ls test/Jenkinsfile-*-fail-* | xargs -n 1 basename | tr 'A-Z' 'a-z' | xargs)" "Failed"
+  download_jenkins_logs_for_failed "$(ls --ignore=*fail* ${CLONE_DIR}/test/ | grep "Jenkinsfile" | tr 'A-Z' 'a-z' | xargs)" "Complete"
+  download_jenkins_logs_for_failed "$(ls ${CLONE_DIR}/test/Jenkinsfile-*-fail-* | xargs -n 1 basename | tr 'A-Z' 'a-z' | xargs)" "Failed"
 
   logcount=$(ls *.log | wc -l)
   if [[ $logcount -gt 0 ]]; then
@@ -121,6 +128,7 @@ function retry {
 # Process arguments
 case $1 in
   applier)
+    clone
     applier
     ;;
   test)

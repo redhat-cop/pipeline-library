@@ -2,7 +2,7 @@
 
 - name: Updated pipeline-library with correct git branch
   replace:
-    path: "{{ inventory_dir }}/../test/create-pipeline-library.groovy"
+    path: "{{ clone_dir }}/test/create-pipeline-library.groovy"
     regexp: "https://github.com/redhat-cop/pipeline-library.git"
     replace: "{{ repository_url }}"
 
@@ -11,9 +11,9 @@
     path: "{{ item }}"
     regexp: "pipeline-library@master"
     replace: "pipeline-library@{{ repo_ref }}"
-  with_fileglob: "{{ inventory_dir }}/../test/Jenkinsfile*"
+  with_fileglob: "{{ clone_dir }}/test/Jenkinsfile*"
 
 - name: Load Jenkinsfile content into memory
   set_fact:
     jenkins_test_files: "{{ jenkins_test_files|default([]) + [{'path': item, 'content': lookup('file', '{{ item }}') }] }}"
-  with_items: "{{ lookup('fileglob', '{{ inventory_dir }}/../test/Jenkinsfile-*', wantlist=true) }}"
+  with_items: "{{ lookup('fileglob', '{{ clone_dir }}/test/Jenkinsfile-*', wantlist=true) }}"

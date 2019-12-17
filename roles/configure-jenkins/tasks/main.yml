@@ -8,7 +8,7 @@
   uri:
     url: "https://{{ url.stdout }}/scriptText"
     method: POST
-    body: "{{ 'script=' ~  lookup('file', '{{ inventory_dir }}/../test/create-pipeline-library.groovy') | urlencode }}"
+    body: "{{ 'script=' ~  lookup('file', '{{ clone_dir }}/test/create-pipeline-library.groovy') | urlencode }}"
     headers:
       Authorization: "Bearer {{ oc_token }}"
     validate_certs: no
