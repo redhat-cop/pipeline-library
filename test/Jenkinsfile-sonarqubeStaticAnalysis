@@ -65,14 +65,14 @@ node("jenkins-slave-ansible") {
                     def route = openshift.selector("route", "sonarqube")
                     def sonarUrl = "https://" + route.object().spec?.host
 
-                    writeFile file: "token.json", text: sh(returnStdout: true, script: "curl -L -X POST -u admin:admin ${sonarUrl}/api/user_tokens/generate?name=jenkins-b${env.BUILD_NUMBER}")
+                    writeFile file: "token.json", text: sh(returnStdout: true, script: "curl --insecure -L -X POST -u admin:admin ${sonarUrl}/api/user_tokens/generate?name=jenkins-b${env.BUILD_NUMBER}")
                     def sonarqubeToken = readJSON file: "token.json"
 
                     sh """
                         sed -i 's|def SONAR_URL|def SONAR_URL = "${sonarUrl}"|' ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy
                         sed -i 's|def SONAR_TOKEN|def SONAR_TOKEN = "${sonarqubeToken.token}"|' ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy
 
-                        curl --header "Authorization: Bearer ${TOKEN}" --data-urlencode "script=\$(< ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy)" ${jenkinsUrl}/scriptText
+                        curl --insecure --header "Authorization: Bearer ${TOKEN}" --data-urlencode "script=\$(< ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy)" ${jenkinsUrl}/scriptText
                         """
                 }
             }
@@ -85,7 +85,9 @@ node("maven") {
         sh "git clone https://github.com/redhat-cop/pipeline-library.git"
 
         dir ("pipeline-library") {
-            sonarqubeStaticAnalysis()
+            sonarqubeStaticAnalysis([
+                curlOptions: "--insecure"
+            ])
         }
     }
 }
