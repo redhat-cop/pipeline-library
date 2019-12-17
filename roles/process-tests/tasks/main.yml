@@ -1,17 +1,24 @@
 ---
 
-- name: Updated pipeline-library with correct git branch
+- name: Update pipeline-library with correct git branch
   replace:
     path: "{{ clone_dir }}/test/create-pipeline-library.groovy"
     regexp: "https://github.com/redhat-cop/pipeline-library.git"
     replace: "{{ repository_url }}"
 
-- name: Updated Jenkinsfile tests with correct git branch
+- name: Update Jenkinsfile tests with correct git branch
   replace:
     path: "{{ item }}"
     regexp: "pipeline-library@master"
     replace: "pipeline-library@{{ repo_ref }}"
   with_fileglob: "{{ clone_dir }}/test/Jenkinsfile*"
+
+- name: Update Sonar Jenkinsfile with correct git repo/branch
+  replace:
+    path: "{{ item }}"
+    regexp: "git clone https://github.com/redhat-cop/pipeline-library.git"
+    replace: "git clone --single-branch --branch {{ repo_ref }} {{ repository_url }}"
+  with_fileglob: "{{ clone_dir }}/test/Jenkinsfile-sonarqubeStaticAnalysis"
 
 - name: Load Jenkinsfile content into memory
   set_fact:

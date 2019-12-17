@@ -24,7 +24,7 @@
     status_code:
     - 200
     - 302
-    body: "<jenkins><install plugin='sonar@2.9' /></jenkins>"
+    body: "<jenkins><install plugin='sonar@2.10' /></jenkins>"
     headers:
       Authorization: "Bearer {{ oc_token }}"
       Content-Type: text/xml
