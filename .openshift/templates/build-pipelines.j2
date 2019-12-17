@@ -1,0 +1,29 @@
+---
+# https://github.com/redhat-cop/openshift-templates/blob/v1.4.14/jenkins-pipelines/jenkins-pipeline-template-no-ocp-triggers.yml
+apiVersion: v1
+kind: List
+items:
+{% for current in jenkins_test_files %}
+{% set jenkinsfile = current.path | basename %}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      build: "{{ jenkinsfile }}"
+      name: "{{ jenkinsfile }}"
+      type: "pipeline"
+    name: "{{ jenkinsfile | lower }}"
+  spec:
+    runPolicy: "Serial"
+    source:
+      contextDir: "test"
+      git:
+        ref: "{{ repo_ref }}"
+        uri: "{{ repository_url }}"
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+{{ current.content | indent(10, True) }}
+      type: JenkinsPipeline
+{% endfor %}

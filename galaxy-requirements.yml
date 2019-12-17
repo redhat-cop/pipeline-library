@@ -1,0 +1,10 @@
+---
+- src: https://github.com/garethahealy/casl-ansible.git
+  scm: git
+  version: master
+  name: casl-ansible
+
+- src: https://github.com/garethahealy/pipeline-library.git
+  scm: git
+  version: auto-testing
+  name: pipeline-library

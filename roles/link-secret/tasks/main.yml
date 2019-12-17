@@ -1,0 +1,4 @@
+---
+
+- name: Link secret to service account for mount
+  command: "oc secrets link --for=mount {{ sa_name }} {{ secret_name }} -n {{ namespace }}"
