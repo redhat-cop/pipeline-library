@@ -4,7 +4,7 @@
   version: master
   name: casl-ansible
 
-- src: https://github.com/garethahealy/pipeline-library.git
+- src: https://github.com/redhat-cop/pipeline-library.git
   scm: git
-  version: auto-testing
+  version: master
   name: pipeline-library
