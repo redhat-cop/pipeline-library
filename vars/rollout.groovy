@@ -48,7 +48,7 @@ def call(RolloutInput input) {
             } catch (ex) {
                 //Something went wrong, so lets print out some helpful information
                 rolloutManager.history()
-                deploymentConfig.describe()
+                resource.describe()
 
                 throw ex
             }
