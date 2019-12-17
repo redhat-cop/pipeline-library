@@ -3,6 +3,7 @@
 class Rollback implements Serializable {
 	//Required
 	String deploymentConfig
+	String resourceKindAndName = ""
 
 	//Optional
 	String rollbackVersion = ""
@@ -20,7 +21,13 @@ def call(Map input) {
 }
 
 def call(Rollback input) {
-	assert input.deploymentConfig?.trim(): "Param deploymentConfig should be defined"
+	if (input.deploymentConfig?.trim()?.length() > 0) {
+		echo "deploymentConfig is deprecated. Please use 'resourceKindAndName'"
+
+		input.resourceKindAndName = input.deploymentConfig
+	}
+	
+	assert input.resourceKindAndName?.trim(): "Param resourceKindAndName should be defined"
 
 	openshift.loglevel(input.loglevel)
 
@@ -32,10 +39,10 @@ def call(Rollback input) {
 		openshift.withProject(input.projectName) {
 			def cmd = input.rollbackVersion?.trim().length() <= 0 ? "" : "--to-revision=${input.rollbackVersion}"
 
-			echo "Attempting to rollback '${input.deploymentConfig}' in ${openshift.project()} ${cmd}"
+			echo "Attempting to rollback '${input.resourceKindAndName}' in ${openshift.project()} ${cmd}"
 
-			def deployment = openshift.selector(input.deploymentConfig)
-			deployment.rollout().undo(cmd)
+			def resource = openshift.selector(input.resourceKindAndName)
+			resource.rollout().undo(cmd)
 		}
 	}
 }

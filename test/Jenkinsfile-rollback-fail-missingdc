@@ -8,7 +8,7 @@ node("maven") {
 
     stage("TEST: Can rollback to earlier version and fail") {
         rollback([
-                deploymentConfig: "dc/doesnt-exist"
+                resourceKindAndName: "dc/doesnt-exist"
         ])
     }
 }

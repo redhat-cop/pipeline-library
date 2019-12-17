@@ -3,6 +3,10 @@
 class RolloutInput implements Serializable {
     //Required
     String deploymentConfigName = ""
+    String resourceKindAndName = ""
+
+    //Optional
+    boolean latest = true
 
     //Optional - Platform
     String clusterAPI           = ""
@@ -16,20 +20,28 @@ def call(Map input) {
 }
 
 def call(RolloutInput input) {
-    assert input.deploymentConfigName?.trim() : "Param deploymentConfigName should be defined."
+    if (input.deploymentConfigName?.trim()?.length() > 0) {
+        echo "deploymentConfig is deprecated. Please use 'resourceKindAndName'"
+
+        input.resourceKindAndName = input.deploymentConfigName
+    }
+
+    assert input.resourceKindAndName?.trim() : "Param resourceKindAndName should be defined."
 
     openshift.loglevel(input.loglevel)
 
     openshift.withCluster(input.clusterAPI, input.clusterToken) {
         openshift.withProject(input.projectName) {
-            echo "Attemping to rollout latest 'deploymentconfig/${input.deploymentConfigName}' in ${openshift.project()}"
+            echo "Attemping to rollout latest '${input.resourceKindAndName}' in ${openshift.project()}"
 
-            def deploymentConfig = openshift.selector('dc', input.deploymentConfigName)
-            def rolloutManager   = deploymentConfig.rollout()
+            def resource = openshift.selector(input.resourceKindAndName)
+            def rolloutManager = resource.rollout()
 
-            rolloutManager.latest()
+            if (input.latest) {
+                rolloutManager.latest()
+            }
 
-            echo "Waiting for rollout of 'deploymentconfig/${input.deploymentConfigName}' in ${openshift.project()} to complete..."
+            echo "Waiting for rollout of '${input.resourceKindAndName}' in ${openshift.project()} to complete..."
 
             try {
                 rolloutManager.status("--watch=true")
