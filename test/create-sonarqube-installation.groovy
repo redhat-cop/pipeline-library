@@ -19,7 +19,7 @@ SystemCredentialsProvider systemCredentialsProvider = SystemCredentialsProvider.
 systemCredentialsProvider.getStore().addCredentials(Domain.global(), stringCredentials)
 systemCredentialsProvider.save()
 
-SonarInstallation sonarInstallation = new SonarInstallation("sonar", "${SONAR_URL}", "sonartoken", null, null, null, null, null)
+SonarInstallation sonarInstallation = new SonarInstallation("sonar", "${SONAR_URL}", "sonartoken", null, null, null, null, null, null)
 
 SonarGlobalConfiguration sonarGlobalConfiguration = instance.getDescriptor(SonarGlobalConfiguration.class)
 sonarGlobalConfiguration.setInstallations(sonarInstallation)
