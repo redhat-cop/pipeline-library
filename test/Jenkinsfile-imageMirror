@@ -2,10 +2,14 @@
 @Library(["pipeline-library@master"]) _
 
 def dockerRegistry
+def promotionNamespace
+def testingNamespace
 
 node("maven") {
     stage("SETUP: Check imagestream doesnt exist") {
         openshift.withCluster() {
+            testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
+            promotionNamespace = testingNamespace + '-promotion-testing'
             openshift.withProject("openshift") {
                 def imageStream = openshift.selector("is", "jenkins")
                 dockerRegistry = sh(returnStdout: true, script: "echo '${imageStream.object().status.dockerImageRepository}' | cut -d '/' -f1").trim()
@@ -15,12 +19,12 @@ node("maven") {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 try {
-                    openshift.newProject("pipelinelib-promotion-testing")
+                    openshift.newProject(promotionNamespace)
                 } catch(ex) {
                     echo "Ignoring new-project error: ${ex}"
                 }
 
-                openshift.withProject("pipelinelib-promotion-testing") {
+                openshift.withProject(promotionNamespace) {
                     def imageStream = openshift.selector("is", "jenkins-slave-image-mgmt")
                     if (imageStream.exists()) {
                         imageStream.delete()
@@ -39,8 +43,8 @@ node("maven") {
                 destinationSecret      : "pipelinelib-testing-my-token",
                 destinationRegistry    : "https://${dockerRegistry}",
                 insecure               : "true",
-                sourceNamespace        : "pipelinelib-testing",
-                destinationNamespace   : "pipelinelib-promotion-testing",
+                sourceNamespace        : "${testingNamespace}",
+                destinationNamespace   : "${promotionNamespace}",
                 sourceImage            : "jenkins-slave-image-mgmt",
                 sourceImageVersion     : "latest",
                 destinationImageVersion: "latest"
@@ -50,7 +54,7 @@ node("maven") {
     stage("ASSERT") {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
-                openshift.withProject("pipelinelib-promotion-testing") {
+                openshift.withProject(promotionNamespace) {
                     def imageStream = openshift.selector("is", "jenkins-slave-image-mgmt")
                     imageStream.untilEach(1) {
                         return it.object().status?.tags?.size() == 1

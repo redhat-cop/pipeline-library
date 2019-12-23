@@ -2,9 +2,11 @@
 @Library(["pipeline-library@master"]) _
 
 def jenkinsUrl
+def sonarqubeNamespace
 
 node("jenkins-slave-ansible") {
     stage("SETUP: Deploy sonarqube via applier") {
+        sonarqubeNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true) + '-sonarqube'
         sh "git clone https://github.com/redhat-cop/containers-quickstarts.git"
 
         openshift.withCluster() {
@@ -13,14 +15,14 @@ node("jenkins-slave-ansible") {
                 jenkinsUrl = "https://" + jenkinsRoute.object().spec?.host
             }
         }
-        
+
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             applier([
                     inventoryPath         : ".applier/hosts",
                     requirementsPath      : "requirements.yml",
                     ansibleRootDir        : "${WORKSPACE}/containers-quickstarts/sonarqube",
                     applierPlaybook       : "galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml",
-                    playbookAdditionalArgs: "-e jenkins_url=${jenkinsUrl}",
+                    playbookAdditionalArgs: "-e jenkins_url=${jenkinsUrl} -e namespace=${sonarqubeNamespace}",
                     clusterAPI            : "https://kubernetes.default.svc",
                     clusterToken          : "${TOKEN}"
             ])
@@ -28,7 +30,7 @@ node("jenkins-slave-ansible") {
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
-                openshift.withProject("sonarqube") {
+                openshift.withProject(sonarqubeNamespace) {
                     def dbDeployment = openshift.selector("dc", "sonardb")
                     dbDeployment.rollout().status("--watch=true")
 
@@ -61,7 +63,7 @@ node("jenkins-slave-ansible") {
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
-                openshift.withProject("sonarqube") {
+                openshift.withProject(sonarqubeNamespace) {
                     def route = openshift.selector("route", "sonarqube")
                     def sonarUrl = "https://" + route.object().spec?.host
 

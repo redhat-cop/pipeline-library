@@ -1,13 +1,16 @@
 #!groovy
 @Library(["pipeline-library@master"]) _
 
+def testingNamespace
+
 node("maven") {
     stage("TEST: Can tag image") {
+        testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
         tagImage([
                 sourceImagePath: "openshift",
                 sourceImageName: "jenkins",
                 sourceImageTag : "2",
-                toImagePath: "pipelinelib-testing",
+                toImagePath    : "${testingNamespace}",
                 toImageName    : "tagimage",
                 toImageTag     : "2"
         ])

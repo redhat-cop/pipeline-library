@@ -1,5 +1,5 @@
 #!groovy
-@Library(["pipeline-library@rollout-rollback-resource"]) _
+@Library(["pipeline-library@master"]) _
 
 node("maven") {
     stage("SETUP: Create deployment files") {

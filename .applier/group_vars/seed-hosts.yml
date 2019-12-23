@@ -9,15 +9,19 @@ secretdata_auth: "openshift1:{{ oc_token }}"
 secretdata:
   dockercfg_json: '{"auths": { "{{ internal_registry_url.split("/")[0] }}": {"username": "openshift1", "password": "{{ oc_token }}", "auth": "{{ secretdata_auth | b64encode }}", "email": "unused"}}}'
 
-secrets:
-  pipelinelib-testing:
-    local-registry-generic:
-      username: "{{ 'openshift1' }}"
-      token: "{{ oc_token }}"
-      registry: "{{ internal_registry_url.split('/')[0] }}"
-    my-token:
-      username: "{{ 'openshift1' }}"
-      password: "{{ oc_token }}"
+secrets: '{
+  "{{ namespace }}": {
+    "local-registry-generic": {
+      "username": "openshift1",
+      "token": "{{ oc_token }}",
+      "registry": "{{ internal_registry_url.split("/")[0] }}"
+    },
+    "my-token": {
+      "username": "openshift1",
+      "password": "{{ oc_token }}"
+    }
+  }
+}'
 
 jenkins:
   deploy:

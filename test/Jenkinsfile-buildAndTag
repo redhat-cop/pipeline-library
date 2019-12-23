@@ -3,12 +3,14 @@
 
 def dockerRegistry
 def firstBuildVersion
+def testingNamespace
 
 podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image-mgmt", volumes: [
         secretVolume(mountPath: "/var/run/secrets/kubernetes.io/dockerconfigjson", secretName: "local-registry")
 ]) {
     node("jnlp") {
         stage("SETUP: Create build files") {
+            testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
             openshift.withCluster() {
                 openshift.withProject("openshift") {
                     def imageStream = openshift.selector("is", "jenkins")
@@ -52,7 +54,7 @@ podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image
                     imageName     : "sample-build",
                     fromFilePath  : "${WORKSPACE}/target/",
                     registryFQDN  : "${dockerRegistry}",
-                    imageNamespace: "pipelinelib-testing",
+                    imageNamespace: "${testingNamespace}",
                     imageVersion  : "v2"
             ])
         }

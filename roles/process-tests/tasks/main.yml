@@ -13,6 +13,13 @@
     replace: "pipeline-library@{{ repo_ref }}"
   with_fileglob: "{{ clone_dir }}/test/Jenkinsfile*"
 
+- name: Update Jenkinsfile tests with correct Jenkins credential name
+  replace:
+    path: "{{ item }}"
+    regexp: "pipelinelib-testing-my-token"
+    replace: "{{ namespace }}-my-token"
+  with_fileglob: "{{ clone_dir }}/test/Jenkinsfile*"
+
 - name: Update Sonar Jenkinsfile with correct git repo/branch
   replace:
     path: "{{ item }}"
