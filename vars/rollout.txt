@@ -15,7 +15,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // rollout.groovy#L4-L15
 
 //Required
@@ -34,7 +34,7 @@ Integer loglevel = 0
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-rollout#L25-L29
 
 stage("TEST: Can rollout to latest version") {

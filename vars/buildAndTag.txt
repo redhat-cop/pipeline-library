@@ -16,7 +16,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // buildAndTag.groovy#L4-L22
 
 //Required
@@ -42,7 +42,7 @@ Integer loglevel = 0
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-buildAndTag#L50-L58
 
 stage("TEST: Can build and tag") {

@@ -23,7 +23,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // sonarqubeStaticAnalysis.groovy#L4-L7
 
 //Optional
@@ -34,7 +34,7 @@ String curlOptions = ""
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-sonarqubeStaticAnalysis#L84-L92
 
 stage("TEST: Can run sonarqube static analysis") {

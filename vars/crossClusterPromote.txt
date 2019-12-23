@@ -15,7 +15,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // crossClusterPromote.groovy#L4-L19
 
 //Required
@@ -38,7 +38,7 @@ Integer loglevel = 0
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-crossClusterPromote#L26-L33
 
 stage("TEST: Can promote image from one project to another") {

@@ -15,7 +15,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // rollback.groovy#L4-L16
 
 //Required
@@ -35,7 +35,7 @@ Integer loglevel = 0
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-rollback#L31-L35
 
 stage("TEST: Can rollback to earlier version") {

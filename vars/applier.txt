@@ -15,7 +15,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // applier.groovy#L6-L20
 
 //Required
@@ -37,7 +37,7 @@ Integer loglevel = 0
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-applier#L11-L22
 
 stage("TEST: Run applier for 'build-s2i-executable'") {

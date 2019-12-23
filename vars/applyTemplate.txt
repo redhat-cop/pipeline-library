@@ -14,7 +14,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // applyTemplate.groovy#L4-L15
 
 //Required
@@ -33,7 +33,7 @@ Integer loglevel = 0
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-applyTemplate#L11-L16
 
 stage("TEST: Can deploy via local file") {

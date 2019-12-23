@@ -14,7 +14,7 @@ Requires Jenkins agent with:
 ### Parameters
 
 The method supports the following parameters:
-```java
+```groovy
 // binaryBuild.groovy#L4-L13
 
 //Required
@@ -31,7 +31,7 @@ Integer loglevel = 0
 
 ### Example
 
-```java
+```groovy
 // ../test/Jenkinsfile-binaryBuild#L33-L39
 
 stage("TEST: Can build using from-file") {
