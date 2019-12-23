@@ -8,6 +8,7 @@ node("jenkins-slave-image-mgmt") {
     stage("SETUP: Check imagestream doesnt exist") {
         testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
         promotionNamespace = testingNamespace + '-promotion-testing'
+
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 try {

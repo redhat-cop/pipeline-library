@@ -88,5 +88,5 @@ find test -type f -name "Jenkinsfile-*" -exec bash -c 'oc start-build $(basename
 
 ### Cleanup
 ```bash
-oc delete project pipelinelib-testing pipelinelib-promotion-testing build-s2i-executable sonarqube
+oc delete project pipelinelib-testing{,-promotion-testing,-build-s2i-executable,-sonarqube}
 ```

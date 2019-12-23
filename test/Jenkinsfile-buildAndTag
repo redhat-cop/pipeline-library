@@ -11,6 +11,7 @@ podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image
     node("jnlp") {
         stage("SETUP: Create build files") {
             testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
+
             openshift.withCluster() {
                 openshift.withProject("openshift") {
                     def imageStream = openshift.selector("is", "jenkins")

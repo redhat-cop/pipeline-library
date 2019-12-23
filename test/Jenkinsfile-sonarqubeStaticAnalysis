@@ -7,6 +7,7 @@ def sonarqubeNamespace
 node("jenkins-slave-ansible") {
     stage("SETUP: Deploy sonarqube via applier") {
         sonarqubeNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true) + '-sonarqube'
+
         sh "git clone https://github.com/redhat-cop/containers-quickstarts.git"
 
         openshift.withCluster() {
