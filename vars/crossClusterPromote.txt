@@ -1,44 +1,102 @@
-# Cross Cluster Promotion
+# crossClusterPromote
 
-Promotes container image cross OpenShift clusters using Skopeo.
-Requires a Jenkins Slave container image that include Skopeo tool.
+## Summary
 
-To be able to use this, you will need to have a secret with following keys:
-* registry - URL for the container registry where we are pushing image to
-* username - Username for pushing the image, must be set as Skopeo require it even if target registry doesn't use it.
-* token - Authentication token for the target registry
+Promote an image from the local cluster to a remote registry.
 
-Sample usage:
+## Usage
 
-Simples example that assumes that above secret is called "other-cluster-credentials":
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+- Skopeo
+
+### Parameters
+
+The method supports the following parameters:
+```groovy
+// crossClusterPromote.groovy#L4-L19
+
+//Required
+String sourceImageName
+String sourceImageTag = "latest"
+String destinationImageName
+String destinationImageTag
+String destinationImagePath
+String targetRegistryCredentials = "other-cluster-credentials"
+
+//Optional
+String sourceImagePath = ""
+
+//Optional - Platform
+String clusterUrl = ""
+String clusterAPI = ""
+String clusterToken = ""
+Integer loglevel = 0
 ```
-stage {
-    steps{
-        crossClusterPromote(sourceImageName: "hello-world", sourceImagePath: "example-project")
-    }
+
+### Example
+
+```groovy
+// ../test/Jenkinsfile-crossClusterPromote#L26-L33
+
+stage("TEST: Can promote image from one project to another") {
+    crossClusterPromote([
+            sourceImageName          : "jenkins-slave-ansible",
+            sourceImagePath          : "pipelinelib-testing",
+            destinationImagePath     : "pipelinelib-promotion-testing",
+            targetRegistryCredentials: "local-registry-generic"
+    ])
 }
 ```
 
-With all parameters
-```
-stage {
-    steps{
-        crossClusterPromote(sourceImageName: "hello-world", 
-							sourceImagePath: "example-project", 
-							sourceImageTag: "release-ready", 
-							destinationImageName: "hello-world2", 
-							destinationImageTag: "released",
-							destinationImagePath: "target-project",
-							targetRegistryCredentials: "<Openshift secret name>"
-							clusterUrl: "https://master.example.com",
-							clusterToken: "<Openshift token>")
-    }
-}
-```
+### Local vs Remote cluster support
 
-Include this library by adding this before "pipeline" in your Jenkins:
-```
-library identifier: "pipeline-library@master", retriever: modernSCM(
-  [$class: "GitSCMSource",
-   remote: "https://github.com/redhat-cop/pipeline-library.git"])
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.
+
+### Secret Format
+
+This method supports using a secret (via targetRegistryCredentials) which is used to login to the cluster that you want to push the image to. Typically,
+a [service account token](https://docs.openshift.com/container-platform/3.11/dev_guide/service_accounts.html#using-a-service-accounts-credentials-externally)
+would be used within the secret.
+
+```yaml
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: cluster-promote-credential-secret
+  annotations:
+    openshift.io/display-name: Cluster Promote Credential Secret
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: "${NAME}"
+  type: Opaque
+  data:
+    username: "${USERNAME_B64}"
+    token: "${TOKEN_B64}"
+    registry: "${REGISTRY_URL_B64}"
+parameters:
+- name: NAME
+  displayName: Name
+  description: The name of secret.
+  required: true
+- name: USERNAME_B64
+  displayName: Username
+  description: Username to use when authenticating against destination registry.
+  required: true
+- name: TOKEN_B64
+  displayName: Token
+  description: Authentication token to use when authenticating against destination registry.
+  required: true
+- name: REGISTRY_URL_B64
+  displayName: Registry URL
+  description: Registry URL of destination registry.
+  required: true
 ```

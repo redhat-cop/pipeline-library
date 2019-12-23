@@ -1,14 +1,47 @@
 # configMap
 
-Read an OpenShift ConfigMap into a groovy map. The ConfigMap must be in the same OpenShift cluster that the Jenkins agent is running in.
+## Summary
 
-# Sample Usage
+Retrieve a (ConfigMap)[https://docs.openshift.com/container-platform/3.11/dev_guide/configmaps.html] data.
 
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+
+### Parameters
+
+The method supports the following parameters:
+```groovy
+// configMap.groovy#L4-L11
+
+//Required
+String configMapName  = ""
+
+//Optional - Platform
+String clusterAPI = ""
+String clusterToken = ""
+String projectName = ""
+Integer loglevel = 0
 ```
-def configMapData = configMap(
-    projectName     : 'my-project',
-    configMapName   : 'my-build-config'
-)
-echo "configMapData: '${configMapData}"
-echo "configMapData.my-entry: '${configMapData.my-entry}"
+
+### Example
+
+```groovy
+// ../test/Jenkinsfile-configMap#L29-L33
+
+stage("TEST: Can get configmap data") {
+    configMapData = configMap([
+            configMapName: "game-config"
+    ])
+}
 ```
+
+### Local vs Remote cluster support
+
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.

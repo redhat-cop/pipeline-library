@@ -1,114 +1,102 @@
 # applier
 
-Applier executes templates on a specified cluster.
+## Summary
 
-Parameters:
+Applier executes [openshift-applier](https://github.com/redhat-cop/openshift-applier) templates on a specified cluster.
 
-applier(secretName: String (required),
-        clusterURL: String (required),
-        inventoryPath: String (required),
-        requirementsPath: String (required),
-        skipTlsVerify: boolean (optional))
+## Usage
 
-Sample usage:
+### Requirements
 
-To run against the local:
+Requires Jenkins agent with:
+- OC
+- Ansible
+
+### Parameters
+
+The method supports the following parameters:
+```groovy
+// applier.groovy#L6-L20
+
+//Required
+String inventoryPath          = ''
+String requirementsPath       = ''
+String ansibleRootDir         = ''
+String rolesPath              = 'galaxy'
+String applierPlaybook        = 'galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml'
+
+//Optional
+String playbookAdditionalArgs = ''
+String secretName             = ''
+
+//Optional - Platform
+String clusterAPI             = ''
+String clusterToken           = ''
+Integer loglevel = 0
 ```
-podTemplate(label: 'applier', cloud: 'openshift', containers: [
-    containerTemplate(name: 'applier', image: 'quay.io/redhat-cop/openshift-applier:latest', ttyEnabled: true, command: 'cat')
-]) {
 
-  node('applier') {
+### Example
 
-    stage('SCM Checkout') {
-        checkout scm
+```groovy
+// ../test/Jenkinsfile-applier#L11-L22
+
+stage("TEST: Run applier for 'build-s2i-executable'") {
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        applier([
+                inventoryPath   : ".applier/hosts",
+                requirementsPath: "requirements.yml",
+                ansibleRootDir  : "${WORKSPACE}/containers-quickstarts/build-s2i-executable",
+                applierPlaybook : "galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml",
+                clusterAPI      : "https://kubernetes.default.svc",
+                clusterToken    : "${TOKEN}"
+        ])
     }
-
-    stage ("Run Applier") {
-        applier(secretName: "mysecret", 
-                clusterURL: "https://ocp.example.com",
-                inventoryPath: ".applier/inventory",
-                requirementsPath: ".applier/requirements.yml",
-                skipTlsVerify: true )
-      }
-  }
 }
 ```
 
-Include this library by adding this before "pipeline" in your Jenkins:
-```
-library identifier: "pipeline-library@master", retriever: modernSCM(
-  [$class: "GitSCMSource",
-   remote: "https://github.com/redhat-cop/pipeline-library.git"])
-```
+### Local vs Remote cluster support
 
-Example Service Account Template:
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.
 
-```
-apiVersion: v1
+### Secret Format
+
+This method supports using a secret (via secretName) which is used to login to the cluster that the applier will work against. Typically,
+a [service account token](https://docs.openshift.com/container-platform/3.11/dev_guide/service_accounts.html#using-a-service-accounts-credentials-externally)
+would be used within the secret.
+
+```yaml
+---
 kind: Template
+apiVersion: v1
 metadata:
+  name: cluster-credential-secret
   annotations:
-    description: template for image mirror service account
+    openshift.io/display-name: Cluster Credential Secret
 objects:
 - apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: ${SA_NAME}
-    namespace: ${NAMESPACE}
-- apiVersion: v1
-  groupNames: null
-  kind: RoleBinding
-  metadata:
-    creationTimestamp: null
-    name: edit
-    namespace: ${NAMESPACE}
-  roleRef:
-    name: edit
-  subjects:
-  - kind: ServiceAccount
-    name: ${SA_NAME}
-    namespace: ${NAMESPACE}
-  userNames:
-  - system:serviceaccount:${NAMESPACE}:${SA_NAME}
-parameters:
-- description: The namespace to deploy into
-  name: NAMESPACE
-  required: true
-- description: The service account name
-  name: SA_NAME
-  required: true
-```
-
-Example Secret Template:
-
-In order to get the TOKEN, you can do `oc serviceaccounts get-token mysecret`. The service account is created from the template above.
-
-```
-apiVersion: v1
-kind: Template
-labels:
-  template: cluster-credentials-secret
-metadata:
-  annotations:
-    description: Cluster Credential Secret
-    tags: secret
-    version: 1.0.0
-  name: cluster-credentials-secret
-objects:
-- apiVersion: v1
-  stringData:
-    token: "${TOKEN}"
-  data:
   kind: Secret
   metadata:
-    name: ${SECRET_NAME}
+    name: "${NAME}"
+    labels:
+      credential.sync.jenkins.openshift.io: "true"
   type: Opaque
+  data:
+    api: "${API_B64}"
+    token: "${TOKEN_B64}"
 parameters:
-- description: The name for the application.
-  name: SECRET_NAME
+- name: NAME
+  displayName: Name
+  description: The name of secret.
   required: true
-- description: Service Account Token
-  name: TOKEN
+- name: API_B64
+  displayName: API
+  description: API url of the cluster the credential is for.
+  required: true
+- name: TOKEN_B64
+  displayName: Token
+  description: Token to use when authenticating.
   required: true
 ```

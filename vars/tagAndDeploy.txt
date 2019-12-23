@@ -1,19 +1,64 @@
 # tagAndDeploy
-First this function tags a given image in a given remote image repository with a given tag and then it invokes a rollout of a given deployment configuration.
 
-## Sample Usage
+## Summary
 
+Tag and deploy an image.
+
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+- Skopeo
+
+### Parameters
+
+The method supports the following parameters:
+```groovy
+// tagAndDeploy.groovy#L4-L22
+
+//Required
+String imageName                    = ''
+String imageNamespace               = ''
+String imageVersion                 = ''
+String registryFQDN                 = ''
+String deployDestinationVersionTag  = ''
+
+//Optional
+String deployDestinationProjectName = ""
+String tagDestinationTLSVerify      = "true"
+String tagSourceTLSVerify           = "true"
+String tagAuthFile                  = "/var/run/secrets/kubernetes.io/dockerconfigjson/.dockerconfigjson"
+String tagDestinationCertDir        = "/run/secrets/kubernetes.io/serviceaccount/"
+String tagSourceCertDir             = "/run/secrets/kubernetes.io/serviceaccount/"
+
+//Optional - Platform
+String clusterAPI                   = ""
+String clusterToken                 = ""
+Integer loglevel = 0
 ```
-tagAndDeploy(
-    imageName                    : 'my-service',
-    imageNamespace               : 'my-app',
-    imageVersion                 : '1.0',
-    registryName                 : 'my-registry.example.com',
-    clusterAPI                   : 'ocp.example.com'
-    clusterToken                 : 'ocp-user-token'
-    deployDestinationProjectName : 'dev'
-    deployDestinationVersionTag  : 'dev'
-    tagDestinationTLSVerify      : 'false'
-    tagSourceTLSVerify           : 'false'
-)
+
+### Example
+
+```groovy
+// ../test/Jenkinsfile-tagAndDeploy#L39-L48
+
+stage("TEST: Can tag and deploy") {
+    tagAndDeploy([
+            registryFQDN               : "${dockerRegistry}",
+            imageNamespace             : "pipelinelib-testing",
+            imageName                  : "taganddeploy",
+            imageVersion               : "latest",
+            deployDestinationVersionTag: "v2",
+            deployDestinationProjectName: "pipelinelib-testing"
+    ])
+}
 ```
+
+### Local vs Remote cluster support
+
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.

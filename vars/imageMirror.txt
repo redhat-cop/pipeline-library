@@ -1,67 +1,103 @@
-# Image Mirror
+# imageMirror
 
-Image mirror allows you to move images from one image registry to another.
+## Summary
 
-Sample Usage:
+(Mirror)[https://docs.openshift.com/container-platform/3.11/dev_guide/managing_images.html#managing-images-mirror-registry-images] an image from one registry to another.
 
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+
+### Parameters
+
+The method supports the following parameters:
+```groovy
+// imageMirror.groovy#L4-L18
+
+//Required
+String sourceSecret = ""
+String sourceRegistry = ""
+String destinationSecret = ""
+String destinationRegistry = ""
+String insecure = "false"
+String sourceNamespace = ""
+String destinationNamespace = ""
+String sourceImage = ""
+String destinationImage = ""
+String sourceImageVersion = "latest"
+String destinationImageVersion = "latest"
+
+//Optional - Platform
+Integer loglevel = 0
 ```
-stage ('Image Mirror') {
-  steps {
-    imageMirror(sourceSecret: "namespace-sourcesecret",
-                sourceRegistry: "https://source-registry.com",
-                destinationSecret: "namespace-destinationsecret",
-                destinationRegistry: "https://destination-registry.com",
-                insecure: "true",
-                sourceNamespace: "source-namespace",
-                destinationNamespace: "destination-namespace",
-                sourceImage: "source-image",
-                destinationImage: "destination-image",
-                sourceImageVersion: "latest",
-                destinationImageVersion: "latest"
-                )
-  }
+
+### Example
+
+```groovy
+// ../test/Jenkinsfile-imageMirror#L35-L48
+
+stage("TEST: Can promote image from one project to another") {
+    imageMirror([
+            sourceSecret           : "pipelinelib-testing-my-token",
+            sourceRegistry         : "https://${dockerRegistry}",
+            destinationSecret      : "pipelinelib-testing-my-token",
+            destinationRegistry    : "https://${dockerRegistry}",
+            insecure               : "true",
+            sourceNamespace        : "pipelinelib-testing",
+            destinationNamespace   : "pipelinelib-promotion-testing",
+            sourceImage            : "jenkins-slave-image-mgmt",
+            sourceImageVersion     : "latest",
+            destinationImageVersion: "latest"
+    ])
 }
 ```
 
-Example Secret Template:
+### Local vs Remote cluster support
 
-```
-apiVersion: v1
-kind: Template
-labels:
-  template: image-mirror-secret
-metadata:
-  annotations:
-    description: Cluster Credential Secret
-    tags: secret
-    version: 1.0.0
-  name: image-mirror-secret
-objects:
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.
+
+#### Secret Format
+
+ This method supports using a Jenkins credential (via sourceSecret and destinationSecret) which is used to login to the cluster that the image mirror will work against. Typically,
+ a [service account token](https://docs.openshift.com/container-platform/3.11/dev_guide/service_accounts.html#using-a-service-accounts-credentials-externally)
+ would be used within the secret.
+
+ ```yaml
+ ---
+ kind: Template
+ apiVersion: v1
+ metadata:
+   name: image-mirror-credential-secret
+   annotations:
+     openshift.io/display-name: Image Mirror Credential Secret
+ objects:
 - apiVersion: v1
-  stringData:
-    token: "${TOKEN}"
-    username: generic
-    password: "${TOKEN}"
-  data:
   kind: Secret
   metadata:
-    name: ${SECRET_NAME}
+    name: "${NAME}"
     labels:
-      credential.sync.jenkins.openshift.io: 'true'
-  type: kubernetes.io/basic-auth
-parameters:
-- description: The name for the application.
-  name: SECRET_NAME
-  required: true
-- description: Service Account Token
-  name: TOKEN
-  required: true
-```
-
-
-Include this library by adding this before "pipeline" in your Jenkins:
-```
-library identifier: "pipeline-library@master", retriever: modernSCM(
-  [$class: "GitSCMSource",
-   remote: "https://github.com/redhat-cop/pipeline-library.git"])
-```
+      credential.sync.jenkins.openshift.io: "true"
+  type: Opaque
+  data:
+    username: "${USERNAME_B64}"
+    password: "${PASSWORD_B64}"
+ parameters:
+ - name: NAME
+   displayName: Name
+   description: The name of secret.
+   required: true
+ - name: USERNAME_B64
+   displayName: Username
+   description: Username to use when authenticating.
+   required: true
+ - name: PASSWORD_B64
+   displayName: Password
+   description: Password to use when authenticating.
+   required: true
+ ```

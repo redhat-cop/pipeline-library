@@ -1,14 +1,52 @@
 # rollout
 
-Invokes a rollout and waits for it to finish for a given Deployment Config.
+## Summary
 
-# Sample Usage
+(Rollout)[https://docs.openshift.com/container-platform/3.11/dev_guide/deployments/basic_deployment_operations.html#start-deployment]
+a deployment and wait until it is successful.
 
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+
+### Parameters
+
+The method supports the following parameters:
+```groovy
+// rollout.groovy#L4-L15
+
+//Required
+String deploymentConfigName = ""
+String resourceKindAndName = ""
+
+//Optional
+boolean latest = true
+
+//Optional - Platform
+String clusterAPI           = ""
+String clusterToken         = ""
+String projectName          = ""
+Integer loglevel = 0
 ```
-rollout(
-    clusterAPI:   "",
-    clusterToken: "",
-    projectName:  "",
-    deploymentConfigName: ""
-)
+
+### Example
+
+```groovy
+// ../test/Jenkinsfile-rollout#L25-L29
+
+stage("TEST: Can rollout to latest version") {
+    rollout([
+            resourceKindAndName: "dc/rollout"
+    ])
+}
 ```
+
+### Local vs Remote cluster support
+
+As the underlying technology used is the [openshift-client-plugin](https://github.com/openshift/jenkins-client-plugin),
+the ability to connect to a the local cluster, a cluster via URL/Token or using
+[Jenkins configuration](https://github.com/openshift/jenkins-client-plugin#configuring-an-openshift-cluster) is as easy
+as setting the clusterAPI and clusterToken parameters.
