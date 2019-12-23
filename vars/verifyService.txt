@@ -1,0 +1,44 @@
+# verifyService
+
+## Summary
+
+Verify service has endpoints accepting connections.
+
+## Usage
+
+### Requirements
+
+Requires Jenkins agent with:
+- OC
+
+### Parameters
+
+The method supports the following parameters:
+```java
+// verifyService.groovy#L4-L11
+
+//Required
+String serviceName = ""
+
+//Optional - Platform
+String clusterAPI = ""
+String clusterToken = ""
+String projectName = ""
+Integer loglevel = 0
+```
+
+### Example
+
+```java
+// ../test/Jenkinsfile-verifyService#L19-L23
+
+stage("TEST: Can verify service") {
+    verifyService([
+            serviceName: "verifyservice"
+    ])
+}
+```
+
+### Local vs Remote cluster support
+
+As the method attempts to call service endpoints within the OCP SDN, the Jenkins Agent must be running on the cluster it is testing.

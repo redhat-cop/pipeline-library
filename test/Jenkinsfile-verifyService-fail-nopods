@@ -1,0 +1,26 @@
+#!groovy
+@Library(["pipeline-library@master"]) _
+
+node("maven") {
+    stage("SETUP: Create deployment files") {
+        openshift.withCluster() {
+            openshift.withProject() {
+                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=verifyservice-fail-nopods", "-p DATABASE_SERVICE_NAME=verifyservice-fail-nopods")
+                openshift.apply(model)
+
+                def deployment = openshift.selector("dc", "verifyservice-fail-nopods")
+                deployment.rollout().status("--watch=true")
+
+                deployment.scale("--replicas=0")
+            }
+        }
+
+        openshift.logLevel(10)
+    }
+
+    stage("TEST: Can verify service and fail due to no pods behind service") {
+        verifyService([
+                serviceName: "verifyservice-fail-nopods"
+        ])
+    }
+}
