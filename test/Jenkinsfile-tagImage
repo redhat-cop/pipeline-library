@@ -4,8 +4,11 @@
 def testingNamespace
 
 node("maven") {
-    stage("TEST: Can tag image") {
+    stage("SETUP: Resolve namespace") {
         testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
+    }
+
+    stage("TEST: Can tag image") {
         tagImage([
                 sourceImagePath: "openshift",
                 sourceImageName: "jenkins",

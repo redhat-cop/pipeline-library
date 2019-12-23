@@ -10,6 +10,7 @@ node("maven") {
         openshift.withCluster() {
             testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
             promotionNamespace = testingNamespace + '-promotion-testing'
+
             openshift.withProject("openshift") {
                 def imageStream = openshift.selector("is", "jenkins")
                 dockerRegistry = sh(returnStdout: true, script: "echo '${imageStream.object().status.dockerImageRepository}' | cut -d '/' -f1").trim()

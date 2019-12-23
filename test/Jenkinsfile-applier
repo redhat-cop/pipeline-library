@@ -1,8 +1,14 @@
 #!groovy
 @Library(["pipeline-library@master"]) _
 
+def applierNamespace
+def testingNamespace
+
 node("jenkins-slave-ansible") {
     stage("SETUP: Clone containers-quickstarts") {
+        testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
+        applierNamespace = testingNamespace + '-build-s2i-executable'
+
         sh "git clone https://github.com/redhat-cop/containers-quickstarts.git"
 
         openshift.logLevel(10)
@@ -15,6 +21,7 @@ node("jenkins-slave-ansible") {
                     requirementsPath: "requirements.yml",
                     ansibleRootDir  : "${WORKSPACE}/containers-quickstarts/build-s2i-executable",
                     applierPlaybook : "galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml",
+                    playbookAdditionalArgs: "-e namespace=${applierNamespace}",
                     clusterAPI      : "https://kubernetes.default.svc",
                     clusterToken    : "${TOKEN}"
             ])
@@ -24,7 +31,7 @@ node("jenkins-slave-ansible") {
     stage("ASSERT") {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
-                openshift.withProject("build-s2i-executable") {
+                openshift.withProject(applierNamespace) {
                     def buildConfig = openshift.selector("bc", "build-s2i-executable")
                     assert buildConfig.exists()
                 }
