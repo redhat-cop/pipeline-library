@@ -13,6 +13,7 @@ class ClusterInput implements Serializable {
 }
 
 // verify deployment
+@deprecated
 def call(Map input) {
     call(new ClusterInput(input))
 }
