@@ -18,6 +18,7 @@ def call(Map input) {
 }
 
 def call(ClusterInput input) {
+    error "verifyDeployment has been deprecated.  Please call rollout with latest:false to verify a deployment"
     assert input.targetApp?.trim(): "Param targetApp should be defined."
 
     openshift.loglevel(input.loglevel)
