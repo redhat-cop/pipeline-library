@@ -8,7 +8,8 @@ CLONE_DIR="/tmp/${CI_REPO_SLUG}/${CI_BRANCH}"
 
 clone() {
   rm -rf ${CLONE_DIR}
-  git clone --single-branch --branch ${CI_BRANCH} "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
+  git clone "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
+  git checkout ${CI_BRANCH}
 }
 
 applier() {
