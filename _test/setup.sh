@@ -21,6 +21,8 @@ applier() {
   sed -i "7s|.*|- src: https://github.com/${CI_REPO_SLUG}.git|" galaxy-requirements.yml
   sed -i "9s/.*/  version: ${CI_BRANCH}/g" galaxy-requirements.yml
 
+  oc version
+  ansible --version
   ansible-galaxy install -r requirements.yml -p galaxy --force
   ansible-playbook -i .applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml \
     -e namespace=${NAMESPACE} \

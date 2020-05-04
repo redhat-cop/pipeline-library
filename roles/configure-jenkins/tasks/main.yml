@@ -4,6 +4,20 @@
   shell: "oc get route jenkins -n {{ namespace }} -o jsonpath='{ .spec.host }'"
   register: url
 
+- name: Get api headers
+  uri:
+    url: "https://{{ url.stdout }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ oc_token }}"
+    validate_certs: no
+  retries: "{{ retries|int }}"
+  delay: "{{ delay|int }}"
+  register: api_result
+
+- debug:
+    msg: "Jenkins Version == {{ api_result.x_jenkins }}"
+
 - name: Create pipeline library
   uri:
     url: "https://{{ url.stdout }}/scriptText"
@@ -12,10 +26,10 @@
     headers:
       Authorization: "Bearer {{ oc_token }}"
     validate_certs: no
-    retries: "{{ retries|int }}"
-    delay: "{{ delay|int }}"
-    register: createlib_result
-    until: createlib_result is not failed
+  retries: "{{ retries|int }}"
+  delay: "{{ delay|int }}"
+  register: createlib_result
+  until: createlib_result is not failed
 
 - name: Install plugins
   uri:
@@ -29,10 +43,10 @@
       Authorization: "Bearer {{ oc_token }}"
       Content-Type: text/xml
     validate_certs: no
-    retries: "{{ retries|int }}"
-    delay: "{{ delay|int }}"
-    register: plugininstall_result
-    until: plugininstall_result is not failed
+  retries: "{{ retries|int }}"
+  delay: "{{ delay|int }}"
+  register: plugininstall_result
+  until: plugininstall_result is not failed
   with_items:
   - sonar@2.10
-  - openshift-client@1.0.32
+  - openshift-client@1.0.34
