@@ -1,7 +1,7 @@
 ---
-- src: https://github.com/garethahealy/casl-ansible.git
+- src: https://github.com/redhat-cop/casl-ansible.git
   scm: git
-  version: master
+  version: v3.11.6
   name: casl-ansible
 
 - src: https://github.com/redhat-cop/pipeline-library.git
