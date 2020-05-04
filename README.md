@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/redhat-cop/pipeline-library.svg?branch=master)](https://travis-ci.org/redhat-cop/pipeline-library)
+![Java CI with Maven](https://github.com/redhat-cop/pipeline-library/workflows/Java%20CI%20with%20Maven/badge.svg)
 [![License](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)]()
 
 # OpenShift Pipeline Library
