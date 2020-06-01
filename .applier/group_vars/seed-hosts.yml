@@ -3,7 +3,7 @@ namespace: pipelinelib-testing
 repository_url: https://github.com/redhat-cop/pipeline-library.git
 repo_ref: master
 clone_dir: /tmp/redhat-cop/pipeline-library/master
-templates_repo_ref: v1.4.13
+templates_repo_ref: v1.4.15
 
 secretdata_auth: "openshift1:{{ oc_token }}"
 secretdata:
