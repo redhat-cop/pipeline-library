@@ -60,7 +60,7 @@ node("jenkins-slave-ansible") {
     }
 
     stage("SETUP: Configure sonarqube") {
-        sh "git clone https://github.com/redhat-cop/pipeline-library.git"
+        sh """git clone https://github.com/redhat-cop/pipeline-library.git"""
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
@@ -85,7 +85,7 @@ node("jenkins-slave-ansible") {
 
 node("maven") {
     stage("TEST: Can run sonarqube static analysis") {
-        sh "git clone https://github.com/redhat-cop/pipeline-library.git"
+        sh """git clone https://github.com/redhat-cop/pipeline-library.git"""
 
         dir ("pipeline-library") {
             sonarqubeStaticAnalysis([
