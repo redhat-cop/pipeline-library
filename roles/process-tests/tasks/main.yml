@@ -24,7 +24,7 @@
   replace:
     path: "{{ item }}"
     regexp: "git clone https://github.com/redhat-cop/pipeline-library.git"
-    replace: "git clone --single-branch --branch {{ repo_ref }} {{ repository_url }}"
+    replace: "git clone {{ repository_url }}; pushd pipeline-library; git checkout {{ repo_ref }}; popd"
   with_fileglob: "{{ clone_dir }}/test/Jenkinsfile-sonarqubeStaticAnalysis"
 
 - name: Load Jenkinsfile content into memory
