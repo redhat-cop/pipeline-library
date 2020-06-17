@@ -13,8 +13,14 @@ clone() {
 }
 
 applier() {
+  pushd ${CLONE_DIR}
+
   echo "${CI_BRANCH}"
   echo "${CI_REPO_SLUG}"
+
+  sed -i "7s|.*|- src: https://github.com/${CI_REPO_SLUG}.git|" galaxy-requirements.yml
+  sed -i "9s/.*/  version: ${CI_BRANCH}/g" galaxy-requirements.yml
+
   ansible-galaxy install -r requirements.yml -p galaxy --force
   ansible-playbook -i .applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml \
     -e namespace=${NAMESPACE} \
@@ -23,6 +29,8 @@ applier() {
     -e clone_dir=${CLONE_DIR} \
     -e oc_token="$(oc whoami --show-token)" \
     -e internal_registry_url="$(oc get is jenkins -n openshift -o jsonpath={.status.dockerImageRepository})"
+
+  popd
 }
 
 test() {
