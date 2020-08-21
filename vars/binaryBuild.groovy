@@ -29,7 +29,8 @@ def call(BinaryBuildInput input) {
             echo "Attemping to start and follow 'buildconfig/${input.buildConfigName}' in ${openshift.project()}"
 
             def buildConfig = openshift.selector('bc', input.buildConfigName)
-            def build       = buildConfig.startBuild("${input.buildFromFlag}=${input.buildFromPath}", '--wait')
+            buildConfig.startBuild("${input.buildFromFlag}=${input.buildFromPath}", '--wait')
+            def build = buildConfig.related('builds')
             build.logs('-f')
         }
     }
