@@ -31,11 +31,10 @@ def call(BinaryBuildInput input) {
             def buildConfig = openshift.selector('bc', input.buildConfigName)
             def build = buildConfig.startBuild("${input.buildFromFlag}=${input.buildFromPath}", '--wait')
             if (build.names().size() > 1) {
-                build.withEach {
-                    if (it.name().contains(input.buildConfigName)) {
-                        it.logs('-f')
-                    }
-                }
+                def buildConfigObject = buildConfig.object()
+                def buildVersion = buildConfigObject.status?.lastVersion
+                def latestBuild = openshift.selector("build", "${input.buildConfigName}-${buildVersion}")
+                latestBuild.logs('-f')
             } else {
                 build.logs('-f')
             }
